@@ -69,9 +69,6 @@ dependencies {
   compile ("com.adaptris:interlok-common:$adpCoreVersion") { changing= true}
   compile ("com.adaptris:adp-licensing:$adpCoreVersion") { changing= true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
-  compile ("com.adaptris:adp-simple-csv:$adpCoreVersion") { changing=true}
-  compile ("com.adaptris:adp-json:$adpCoreVersion") { changing=true}
-  compile ("com.fasterxml.jackson.core:jackson-databind:2.7.0")
 
   testCompile ('junit:junit:4.12')
   testCompile ("com.adaptris:adp-stubs:$adpCoreVersion") { changing= true}
