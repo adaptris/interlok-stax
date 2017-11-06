@@ -14,7 +14,6 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.ExceptionHelper;
-import com.adaptris.core.util.LoggingHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -60,7 +59,6 @@ public class StaxStartDocument extends StaxXmlOutput {
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
-    log.trace("Beginning doService in {}", LoggingHelper.friendlyName(this));
     StaxOutputWrapper wrapper = null;
     String encoding = evaluateEncoding(msg);
     try {
