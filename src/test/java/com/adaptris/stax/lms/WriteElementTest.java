@@ -86,7 +86,7 @@ public class WriteElementTest extends ServiceCase {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());
     try {
       File tempFile = new FileBackedMessageFactory().createTempFile(this);
-      StaxOutputWrapper wrapper = new StaxOutputWrapper(tempFile, "UTF-8", "root");
+      StaxOutputWrapper wrapper = new StaxOutputWrapper(tempFile).withEncoding("UTF-8").withRootElement("root");
       AdaptrisMessage msg = new DefectiveMessageFactory(WhenToBreak.INPUT).newMessage();
       msg.addObjectHeader(XML_OUTPUT_WRITER_KEY, wrapper);
       service.doService(msg);

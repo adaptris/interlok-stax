@@ -7,6 +7,7 @@ import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessage;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.stax.lms.StaxOutputWrapper.StaxConfig;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -42,10 +43,10 @@ public class StaxEndDocument extends StaxXmlOutput {
     try {
       wrapper = unwrap(msg);
       finishAndClose(wrapper);
-      log.trace("Using [{}] for contents of message", wrapper.outputFile.getCanonicalPath());
-      ((FileBackedMessage) msg).initialiseFrom(wrapper.outputFile);
-      log.trace("Encoding set to [{}]", wrapper.encoding);
-      msg.setContentEncoding(wrapper.encoding);
+      log.trace("Using [{}] for contents of message", wrapper.outputFile().getCanonicalPath());
+      ((FileBackedMessage) msg).initialiseFrom(wrapper.outputFile());
+      log.trace("Encoding set to [{}]", wrapper.getStaxConfig(StaxConfig.Encoding));
+      msg.setContentEncoding(wrapper.getStaxConfig(StaxConfig.Encoding));
       msg.getObjectHeaders().remove(XML_OUTPUT_WRITER_KEY);
     }
     catch (Exception e) {

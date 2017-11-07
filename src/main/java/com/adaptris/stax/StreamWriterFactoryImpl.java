@@ -1,5 +1,7 @@
 package com.adaptris.stax;
 
+import static com.adaptris.stax.StaxUtils.closeQuietly;
+
 import javax.xml.stream.XMLStreamWriter;
 
 import org.slf4j.Logger;
@@ -19,13 +21,4 @@ public abstract class StreamWriterFactoryImpl implements StreamWriterFactory {
     closeQuietly(w);
   }
 
-  protected static void closeQuietly(XMLStreamWriter w) {
-    try {
-      if (w != null) {
-        w.close();
-      }
-    } catch (Exception ignore) {
-
-    }
-  }
 }

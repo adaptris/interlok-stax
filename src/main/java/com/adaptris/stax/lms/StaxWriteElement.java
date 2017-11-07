@@ -12,6 +12,7 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.stax.StaxUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -49,22 +50,19 @@ public class StaxWriteElement extends StaxXmlOutput {
       StaxOutputWrapper wrapper = unwrap(msg);
       try (InputStream in = msg.getInputStream()) {
         reader = XMLInputFactory.newInstance().createXMLEventReader(in);
-        long count = 0;
         while (reader.hasNext()) {
           XMLEvent evt = reader.nextEvent();
           if (emit(evt)) {
-            count++;
-            wrapper.xmlWriter.add(evt);
+            wrapper.eventWriter().add(evt);
           }
         }
-        log.trace("Added {} XMLEvents to {}", count, wrapper);
       }
     }
     catch (Exception e) {
       throw ExceptionHelper.wrapServiceException(e);
     }
     finally {
-      closeQuietly(reader);
+      StaxUtils.closeQuietly(reader);
     }
   }
 
@@ -78,14 +76,4 @@ public class StaxWriteElement extends StaxXmlOutput {
     return true;
   }
 
-  private void closeQuietly(XMLEventReader r) {
-    try {
-      if (r != null) {
-        r.close();
-      }
-    }
-    catch (Exception ignored) {
-
-    }
-  }
 }

@@ -42,6 +42,17 @@ public class StartDocumentTest extends ServiceCase {
         service.rootElement(AdaptrisMessageFactory.getDefaultInstance().newMessage()));
   }
 
+  public void testPrefixNamespace() throws Exception {
+    StaxStartDocument service = new StaxStartDocument();
+    assertNull(service.getPrefix());
+    assertNull(service.getNamespaceUri());
+    service.setPrefix("hello");
+    service.setNamespaceUri("hello");
+    assertEquals("hello", service.getPrefix());
+    assertEquals("hello", service.getNamespaceUri());
+  }
+
+
   public void testMessageEncoding() throws Exception {
     StaxStartDocument service = new StaxStartDocument();
     assertNull(service.getOutputMessageEncoding());

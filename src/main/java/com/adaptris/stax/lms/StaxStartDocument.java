@@ -7,6 +7,7 @@ import java.io.File;
 
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.annotation.InputFieldHint;
 import com.adaptris.core.AdaptrisMessage;
@@ -37,6 +38,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  */
 @XStreamAlias("stax-xml-start-document")
 @ComponentProfile(summary = "Prepare for writing large XML output via STaX", tag = "service,transform,xml", since = "3.6.6")
+@DisplayOrder(order = {"outputMessageEncoding", "rootElement", "prefix", "namespace"})
 public class StaxStartDocument extends StaxXmlOutput {
 
   public static final String DEFAULT_ROOT_ELEMENT = "root";
@@ -47,6 +49,16 @@ public class StaxStartDocument extends StaxXmlOutput {
   @InputFieldDefault(value = "root")
   @InputFieldHint(expression = true)
   private String rootElement = null;
+
+  @AdvancedConfig
+  @InputFieldDefault(value = "")
+  @InputFieldHint(expression = true, style = "BLANKABLE")
+  private String prefix;
+  @AdvancedConfig
+  @InputFieldDefault(value = "")
+  @InputFieldHint(expression = true, style = "BLANKABLE")
+  private String namespaceUri;
+
 
   public StaxStartDocument() {
 
@@ -65,11 +77,11 @@ public class StaxStartDocument extends StaxXmlOutput {
       FileBackedMessageFactory factory = messageFactory(msg);
       File tempFile = factory.createTempFile(msg);
       log.trace("Created {} for XML output", tempFile.getCanonicalPath());
-      wrapper = new StaxOutputWrapper(tempFile, encoding, rootElement(msg));
+      wrapper = new StaxOutputWrapper(tempFile).withEncoding(encoding).withRootElement(rootElement(msg))
+          .withPrefix(msg.resolve(getPrefix())).withNamespaceURI(msg.resolve(getNamespaceUri())).start();
       msg.addObjectHeader(XML_OUTPUT_WRITER_KEY, wrapper);
       log.trace("Added [{}] as object metadata", wrapper);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       closeQuietly(wrapper);
       throw ExceptionHelper.wrapServiceException(e);
     }
@@ -124,6 +136,34 @@ public class StaxStartDocument extends StaxXmlOutput {
       encoding = msg.getContentEncoding();
     }
     return encoding;
+  }
+
+  /**
+   * @return the prefix
+   */
+  public String getPrefix() {
+    return prefix;
+  }
+
+  /**
+   * @param prefix the prefix to set
+   */
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
+  }
+
+  /**
+   * @return the namespaceUri
+   */
+  public String getNamespaceUri() {
+    return namespaceUri;
+  }
+
+  /**
+   * @param s the namespaceUri to set
+   */
+  public void setNamespaceUri(String s) {
+    this.namespaceUri = s;
   }
 
 
