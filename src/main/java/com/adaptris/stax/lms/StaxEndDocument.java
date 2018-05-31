@@ -25,7 +25,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * </p>
  * 
  * @config stax-xml-end-document
- * @license STANDARD
  * @see StaxStartDocument
  * @see StaxWriteElement
  */

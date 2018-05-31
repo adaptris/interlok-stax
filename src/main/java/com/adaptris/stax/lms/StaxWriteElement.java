@@ -30,7 +30,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * </p>
  * 
  * @config stax-xml-write-element
- * @license STANDARD
  *
  * @see StaxStartDocument
  * @see StaxEndDocument

@@ -1,17 +1,12 @@
 package com.adaptris.stax.lms;
 
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-import static org.mockito.Mockito.when;
-
-import org.mockito.Mockito;
 
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.DefaultMessageFactory;
 import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
-import com.adaptris.core.licensing.License;
-import com.adaptris.core.licensing.License.LicenseType;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.LifecycleHelper;
 
@@ -21,16 +16,6 @@ public class StartDocumentTest extends ServiceCase {
     super(name);
   }
 
-  public void testLicense() throws Exception {
-    License license = Mockito.mock(License.class);
-    StaxStartDocument service = new StaxStartDocument();
-    when(license.isEnabled(LicenseType.Standard)).thenReturn(true);
-    assertTrue(service.isEnabled(license));
-
-    when(license.isEnabled(LicenseType.Standard)).thenReturn(false);
-    assertFalse(service.isEnabled(license));
-
-  }
 
   public void testSetRootElement() throws Exception {
     StaxStartDocument service = new StaxStartDocument();

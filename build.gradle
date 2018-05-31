@@ -67,7 +67,6 @@ configurations.all {
 dependencies {
   compile ("com.adaptris:adp-core:$adpCoreVersion") { changing= true}
   compile ("com.adaptris:interlok-common:$adpCoreVersion") { changing= true}
-  compile ("com.adaptris:adp-licensing:$adpCoreVersion") { changing= true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
 
   testCompile ('junit:junit:4.12')
