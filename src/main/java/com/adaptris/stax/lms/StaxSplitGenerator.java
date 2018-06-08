@@ -12,14 +12,14 @@ import java.util.Iterator;
 
 public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> implements CloseableIterable<T>, Iterator<T> {
 
-  public transient S config;
+  private transient S config;
   private transient String elementToSplitOn;
   private transient T nextMessage;
 
   public StaxSplitGenerator(S cfg) throws Exception {
     this.config = cfg;
     init(config);
-    String thePath = config.path;
+    String thePath = config.getPath();
     if (thePath.startsWith("/")) {
       thePath = thePath.substring(1);
     }
@@ -29,7 +29,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
       found = nextMatching(s);
     }
     if (found == null) {
-      throw new CoreException("Could not traverse to " + config.path);
+      throw new CoreException("Could not traverse to " + config.getPath());
     }
     elementToSplitOn = ((StartElement) found).getName().getLocalPart();
     nextMessage = generateNextMessage(found, elementToSplitOn);
@@ -69,7 +69,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
   @Override
   public void close() throws IOException {
     try {
-      config.reader.close();
+      config.getReader().close();
     }
     catch (XMLStreamException e) {
       throw new IOException(e);
@@ -84,8 +84,8 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
   public XMLEvent nextMatching(String elementName) throws Exception {
     // iterate over the read until event == XmlEvent.START_ELEMENT
     // return it.
-    while (config.reader.hasNext()) {
-      XMLEvent evt = config.reader.nextEvent();
+    while (config.getReader().hasNext()) {
+      XMLEvent evt = config.getReader().nextEvent();
       if (evt.getEventType() == XMLEvent.START_ELEMENT) {
         if (((StartElement) evt).getName().getLocalPart().equals(elementName)) {
           return evt;
@@ -104,4 +104,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
     return true;
   }
 
+  public S getConfig() {
+    return config;
+  }
 }

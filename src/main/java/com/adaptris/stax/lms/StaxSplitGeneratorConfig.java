@@ -3,18 +3,26 @@ package com.adaptris.stax.lms;
 import javax.xml.stream.XMLEventReader;
 
 public abstract class StaxSplitGeneratorConfig {
-  String path;
-  XMLEventReader reader;
+  private String path;
+  private XMLEventReader reader;
 
   @SuppressWarnings("unchecked")
-  <T extends StaxSplitGeneratorConfig> T withPath(String s) {
+  public <T extends StaxSplitGeneratorConfig> T withPath(String s) {
     path = s;
     return (T)this;
   }
 
+  public String getPath() {
+    return path;
+  }
+
   @SuppressWarnings("unchecked")
-  <T extends StaxSplitGeneratorConfig> T withReader(XMLEventReader reader) {
+  public <T extends StaxSplitGeneratorConfig> T withReader(XMLEventReader reader) {
     this.reader = reader;
     return (T)this;
+  }
+
+  public XMLEventReader getReader() {
+    return reader;
   }
 }

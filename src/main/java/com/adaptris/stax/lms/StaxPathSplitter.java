@@ -190,13 +190,13 @@ public class StaxPathSplitter extends MessageSplitterImp {
       if (event == null) return null;
       AdaptrisMessage splitMsg = factory.newMessage();
       XMLEventWriter xmlWriter = null;
-      String encoding = evaluateEncoding(config.originalMessage);
+      String encoding = evaluateEncoding(getConfig().originalMessage);
       try (Writer w = splitMsg.getWriter(encoding)) {
         xmlWriter = XMLOutputFactory.newInstance().createXMLEventWriter(w);
         xmlWriter.add(eventFactory.createStartDocument(encoding, "1.0"));
         xmlWriter.add(event);
-        while (isNotEndElement(event, elementName) && config.reader.hasNext()) {
-          event = config.reader.nextEvent();
+        while (isNotEndElement(event, elementName) && getConfig().getReader().hasNext()) {
+          event = getConfig().getReader().nextEvent();
           xmlWriter.add(event);
         }
         xmlWriter.add(eventFactory.createEndDocument());
@@ -204,7 +204,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       finally {
         StaxUtils.closeQuietly(xmlWriter);
       }
-      copyMetadata(config.originalMessage, splitMsg);
+      copyMetadata(getConfig().originalMessage, splitMsg);
       return splitMsg;
     }
   }
