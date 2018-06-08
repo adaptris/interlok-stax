@@ -15,28 +15,6 @@
 */
 package com.adaptris.stax.lms;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Iterator;
-
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-
-import org.hibernate.validator.constraints.NotBlank;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.AdaptrisMessage;
@@ -44,10 +22,21 @@ import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.services.splitter.MessageSplitterImp;
 import com.adaptris.core.util.Args;
-import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.hibernate.validator.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.stream.*;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Writer;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Splitter implementation that splits based on STaX events.
@@ -90,7 +79,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       String thePath = msg.resolve(getPath());
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
       XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
-      return new StaxSplitGenerator(new GeneratorConfig().withReader(reader).withPath(thePath).withOriginalMessage(msg));
+      return new AbdaptrisMessageStaxSplitGenerator(new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg).withReader(reader).withPath(thePath));
     }
     catch (Exception e) {
       throw ExceptionHelper.wrapCoreException(e);
@@ -170,80 +159,33 @@ public class StaxPathSplitter extends MessageSplitterImp {
     return encoding;
   }
 
-  private class GeneratorConfig {
+  private class AdaptrisMessageStaxSplitGeneratorConfig extends StaxSplitGeneratorConfig {
     AdaptrisMessage originalMessage;
-    String path;
-    XMLEventReader reader;
-
-    GeneratorConfig withOriginalMessage(AdaptrisMessage msg) {
+    AdaptrisMessageStaxSplitGeneratorConfig withOriginalMessage(AdaptrisMessage msg) {
       originalMessage = msg;
-      return this;
-    }
-
-    GeneratorConfig withPath(String s) {
-      path = s;
-      return this;
-    }
-
-    GeneratorConfig withReader(XMLEventReader reader) {
-      this.reader = reader;
       return this;
     }
   }
 
-  private class StaxSplitGenerator implements CloseableIterable<AdaptrisMessage>, Iterator<AdaptrisMessage> {
-    private transient GeneratorConfig config;
-    private transient AdaptrisMessageFactory factory;
-    private transient AdaptrisMessage nextMessage;
-    private transient String elementToSplitOn;
-    private transient XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
-    protected StaxSplitGenerator(GeneratorConfig cfg) throws Exception {
-      this.config = cfg;
-      this.factory = selectFactory(config.originalMessage);
-      String thePath = config.path;
-      if (thePath.startsWith("/")) {
-        thePath = thePath.substring(1);
-      }
-      String[] elements = thePath.split("/");
-      XMLEvent found = null;
-      for (String s : elements) {
-        found = nextMatching(s);
-      }
-      if (found == null) {
-        throw new CoreException("Could not traverse to " + path);
-      }
-      elementToSplitOn = ((StartElement) found).getName().getLocalPart();
-      nextMessage = generateNextMessage(found, elementToSplitOn);
+  private class AbdaptrisMessageStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
+
+    private transient AdaptrisMessageFactory factory;
+    private transient XMLEventFactory eventFactory;
+
+    AbdaptrisMessageStaxSplitGenerator(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws Exception {
+      super(cfg);
       logR.trace("Using message factory: {}", factory.getClass());
     }
 
     @Override
-    public Iterator<AdaptrisMessage> iterator() {
-      return this;
+    public void init(AdaptrisMessageStaxSplitGeneratorConfig cfg) {
+      this.factory = selectFactory(cfg.originalMessage);
+      this.eventFactory = XMLEventFactory.newInstance();
     }
 
     @Override
-    public boolean hasNext() {
-      if (nextMessage == null) {
-        try {
-          nextMessage = generateNextMessage(nextMatching(elementToSplitOn), elementToSplitOn);
-        }
-        catch (Exception e) {
-          throw new RuntimeException("Could not construct next AdaptrisMessage", e);
-        }
-      }
-      return nextMessage != null;
-    }
-
-    @Override
-    public AdaptrisMessage next() {
-      AdaptrisMessage ret = nextMessage;
-      nextMessage = null;
-      return ret;
-    }
-
-    private AdaptrisMessage generateNextMessage(XMLEvent evt, String elementName) throws Exception {
+    public AdaptrisMessage generateNextMessage(XMLEvent evt, String elementName) throws Exception {
       XMLEvent event = evt;
       if (event == null) return null;
       AdaptrisMessage splitMsg = factory.newMessage();
@@ -265,45 +207,5 @@ public class StaxPathSplitter extends MessageSplitterImp {
       copyMetadata(config.originalMessage, splitMsg);
       return splitMsg;
     }
-
-    @Override
-    public void close() throws IOException {
-      try {
-        config.reader.close();
-      }
-      catch (XMLStreamException e) {
-        throw new IOException(e);
-      }
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-
-    private XMLEvent nextMatching(String elementName) throws Exception {
-      // iterate over the read until event == XmlEvent.START_ELEMENT
-      // return it.
-      while (config.reader.hasNext()) {
-        XMLEvent evt = config.reader.nextEvent();
-        if (evt.getEventType() == XMLEvent.START_ELEMENT) {
-          if (((StartElement) evt).getName().getLocalPart().equals(elementName)) {
-            return evt;
-          }
-        }
-      }
-      return null;
-    }
-
-    private boolean isNotEndElement(XMLEvent evt, String elementName) throws Exception {
-      if (evt.getEventType() == XMLEvent.END_ELEMENT) {
-        if (((EndElement) evt).getName().getLocalPart().equals(elementName)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-  };
-
+  }
 }
