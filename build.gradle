@@ -35,13 +35,6 @@ def versionDir = "$buildDir/version"
 repositories {
   maven { url "$defaultNexusRepo" }
   maven { url "https://development.adaptris.net/nexus/content/groups/public" }
-  maven {
-    credentials {
-      username repoUsername
-      password repoPassword
-    }
-    url "https://development.adaptris.net/nexus/content/groups/private"
-  }
   maven { url "https://development.adaptris.net/nexus/content/repositories/snapshots" }
   maven { url "https://development.adaptris.net/nexus/content/repositories/releases" }
 }
@@ -67,12 +60,10 @@ configurations.all {
 dependencies {
   compile ("com.adaptris:adp-core:$adpCoreVersion") { changing= true}
   compile ("com.adaptris:interlok-common:$adpCoreVersion") { changing= true}
-  compile ("com.adaptris:adp-licensing:$adpCoreVersion") { changing= true}
   compile ("org.slf4j:slf4j-api:$slf4jVersion")
 
   testCompile ('junit:junit:4.12')
   testCompile ("com.adaptris:adp-stubs:$adpCoreVersion") { changing= true}
-  testCompile ("com.adaptris:adp-licensing-stub:$adpCoreVersion") { changing= true}
   testCompile ("org.apache.logging.log4j:log4j-core:2.8.1")
   testCompile ("org.apache.logging.log4j:log4j-1.2-api:2.8.1")
   testCompile ("org.apache.logging.log4j:log4j-slf4j-impl:2.8.1")
@@ -109,6 +100,8 @@ task generateVersion {
     ant.propertyfile(file: versionFile) {
       entry(key: 'component.name', value: componentName)
       entry(key: 'build.version', value: releaseVersion)
+      entry(key: 'groupId', value: "com.adaptris")
+      entry(key: 'artifactId', value: project.name)
       entry(key: 'build.date', value: new Date().format('yyyy-MM-dd'))
     }
   }
@@ -127,8 +120,17 @@ javadoc {
 }
 
 jacoco {
-  toolVersion="0.7.9"
+  toolVersion="0.8.0"
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
   classifier = 'javadoc'
@@ -157,6 +159,8 @@ publishing {
         asNode().appendNode("description", "STaX support within Interlok")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.6.6+")
+        properties.appendNode("tags", "stax,xml")
+        properties.appendNode("license", "false")
       }
     }
   }

@@ -1,11 +1,25 @@
+/*
+    Copyright Adaptris Ltd
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 package com.adaptris.stax.lms;
 
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 
-import org.mockito.Mockito;
 import org.w3c.dom.Document;
 
 import com.adaptris.core.Adapter;
@@ -16,8 +30,6 @@ import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.XStreamMarshaller;
 import com.adaptris.core.event.StandardAdapterStartUpEvent;
-import com.adaptris.core.licensing.License;
-import com.adaptris.core.licensing.License.LicenseType;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.stubs.DefectiveMessageFactory;
 import com.adaptris.core.stubs.DefectiveMessageFactory.WhenToBreak;
@@ -31,18 +43,6 @@ public class WriteElementTest extends ServiceCase {
   public WriteElementTest(String name) {
     super(name);
   }
-
-  public void testLicense() throws Exception {
-    License license = Mockito.mock(License.class);
-    StaxWriteElement service = new StaxWriteElement();
-    when(license.isEnabled(LicenseType.Standard)).thenReturn(true);
-    assertTrue(service.isEnabled(license));
-
-    when(license.isEnabled(LicenseType.Standard)).thenReturn(false);
-    assertFalse(service.isEnabled(license));
-
-  }
-
 
   public void testService_NoObject() throws Exception {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());
