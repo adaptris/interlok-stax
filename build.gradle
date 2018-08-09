@@ -165,6 +165,7 @@ publishing {
       artifact sourcesJar { classifier "sources" }
 
       pom.withXml {
+        asNode().appendNode("name", componentName)
         asNode().appendNode("description", "STaX support within Interlok")
         def properties = asNode().appendNode("properties")
         properties.appendNode("target", "3.6.6+")
