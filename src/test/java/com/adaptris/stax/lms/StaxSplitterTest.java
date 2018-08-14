@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class StaxSplitterTest {
   public void testSplit_Remove() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
-    try (CloseableIterable<AdaptrisMessage> i = ensureCloseable(splitter.splitMessage(msg))) {
+    try (CloseableIterable<AdaptrisMessage> i = CloseableIterable.ensureCloseable(splitter.splitMessage(msg))) {
       i.iterator().remove();
     };
   }
@@ -112,7 +111,7 @@ public class StaxSplitterTest {
       return (List<AdaptrisMessage>) iter;
     }
     List<AdaptrisMessage> result = new ArrayList<AdaptrisMessage>();
-    try (CloseableIterable<AdaptrisMessage> messages = ensureCloseable(iter)) {
+    try (CloseableIterable<AdaptrisMessage> messages = CloseableIterable.ensureCloseable(iter)) {
       for (AdaptrisMessage msg : messages) {
         result.add(msg);
       }
@@ -121,21 +120,4 @@ public class StaxSplitterTest {
     return result;
   }
 
-  private static <E> CloseableIterable<E> ensureCloseable(final Iterable<E> iter) {
-    if (iter instanceof CloseableIterable) {
-      return (CloseableIterable<E>) iter;
-    }
-
-    return new CloseableIterable<E>() {
-      @Override
-      public void close() throws IOException {
-        // No-op
-      }
-
-      @Override
-      public Iterator<E> iterator() {
-        return iter.iterator();
-      }
-    };
-  }
 }
