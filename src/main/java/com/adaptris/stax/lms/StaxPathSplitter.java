@@ -15,6 +15,24 @@
 */
 package com.adaptris.stax.lms;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Writer;
+
+import javax.xml.stream.XMLEventFactory;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
+import org.hibernate.validator.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.AdaptrisMessage;
@@ -25,18 +43,6 @@ import com.adaptris.core.util.Args;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.hibernate.validator.constraints.NotBlank;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.Writer;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Splitter implementation that splits based on STaX events.
@@ -79,7 +85,9 @@ public class StaxPathSplitter extends MessageSplitterImp {
       String thePath = msg.resolve(getPath());
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
       XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
-      return new AbdaptrisMessageStaxSplitGenerator(new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg).withReader(reader).withPath(thePath));
+      return new AdaptrisMessageStaxSplitGenerator(
+          new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg).withXmlEventReader(reader).withPath(thePath)
+              .withInputReader(buf));
     }
     catch (Exception e) {
       throw ExceptionHelper.wrapCoreException(e);
@@ -168,12 +176,12 @@ public class StaxPathSplitter extends MessageSplitterImp {
   }
 
 
-  private class AbdaptrisMessageStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
+  private class AdaptrisMessageStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
 
     private transient AdaptrisMessageFactory factory;
     private transient XMLEventFactory eventFactory;
 
-    AbdaptrisMessageStaxSplitGenerator(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws Exception {
+    AdaptrisMessageStaxSplitGenerator(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws Exception {
       super(cfg);
       logR.trace("Using message factory: {}", factory.getClass());
     }
@@ -195,8 +203,8 @@ public class StaxPathSplitter extends MessageSplitterImp {
         xmlWriter = XMLOutputFactory.newInstance().createXMLEventWriter(w);
         xmlWriter.add(eventFactory.createStartDocument(encoding, "1.0"));
         xmlWriter.add(event);
-        while (isNotEndElement(event, elementName) && getConfig().getReader().hasNext()) {
-          event = getConfig().getReader().nextEvent();
+        while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
+          event = getConfig().getXmlEventReader().nextEvent();
           xmlWriter.add(event);
         }
         xmlWriter.add(eventFactory.createEndDocument());

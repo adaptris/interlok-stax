@@ -19,8 +19,10 @@ package com.adaptris.stax.lms;
 import static com.adaptris.stax.StaxUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +38,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.adaptris.core.util.Args;
 
-final class StaxOutputWrapper {
+final class StaxOutputWrapper implements Closeable {
 
   static enum StaxConfig {
     Encoding {
@@ -145,7 +147,8 @@ final class StaxOutputWrapper {
     return this;
   }
 
-  void close() {
+  @SuppressWarnings("deprecation")
+  public void close() throws IOException {
     closeQuietly(xmlWriter);
     IOUtils.closeQuietly(output);
   }

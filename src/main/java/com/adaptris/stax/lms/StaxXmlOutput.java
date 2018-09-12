@@ -16,6 +16,8 @@
 
 package com.adaptris.stax.lms;
 
+import org.apache.commons.io.IOUtils;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
@@ -65,10 +67,9 @@ public abstract class StaxXmlOutput extends ServiceImp {
     return Args.notNull((StaxOutputWrapper) msg.getObjectHeaders().get(XML_OUTPUT_WRITER_KEY), "xmlEventWriter");
   }
 
+  @SuppressWarnings("deprecation")
   protected void closeQuietly(StaxOutputWrapper f) {
-    if (f != null) {
-      f.close();
-    }
+    IOUtils.closeQuietly(f);
   }
 
 }

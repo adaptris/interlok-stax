@@ -1,14 +1,17 @@
 package com.adaptris.stax.lms;
 
-import com.adaptris.core.CoreException;
-import com.adaptris.core.util.CloseableIterable;
+import java.io.IOException;
+import java.util.Iterator;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import java.io.IOException;
-import java.util.Iterator;
+
+import org.apache.commons.io.IOUtils;
+
+import com.adaptris.core.CoreException;
+import com.adaptris.core.util.CloseableIterable;
 
 public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> implements CloseableIterable<T>, Iterator<T> {
 
@@ -67,9 +70,11 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void close() throws IOException {
     try {
-      config.getReader().close();
+      config.getXmlEventReader().close();
+      IOUtils.closeQuietly(config.getInputReader());
     }
     catch (XMLStreamException e) {
       throw new IOException(e);
@@ -84,8 +89,8 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
   public XMLEvent nextMatching(String elementName) throws Exception {
     // iterate over the read until event == XmlEvent.START_ELEMENT
     // return it.
-    while (config.getReader().hasNext()) {
-      XMLEvent evt = config.getReader().nextEvent();
+    while (config.getXmlEventReader().hasNext()) {
+      XMLEvent evt = config.getXmlEventReader().nextEvent();
       if (evt.getEventType() == XMLEvent.START_ELEMENT) {
         if (((StartElement) evt).getName().getLocalPart().equals(elementName)) {
           return evt;
