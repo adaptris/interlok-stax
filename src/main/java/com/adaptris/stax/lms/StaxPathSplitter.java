@@ -15,33 +15,50 @@
 */
 package com.adaptris.stax.lms;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.util.Iterator;
 
-import javax.xml.stream.XMLEventFactory;
+import javax.validation.Valid;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.adaptris.annotation.AdvancedConfig;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.services.splitter.MessageSplitterImp;
 import com.adaptris.core.util.Args;
+import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.ExceptionHelper;
-import com.adaptris.stax.StaxUtils;
+import com.adaptris.core.util.XmlHelper;
+import com.adaptris.util.KeyValuePairSet;
+import com.adaptris.util.text.xml.SimpleNamespaceContext;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -55,10 +72,16 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @config stax-path-splitter
  */
 @XStreamAlias("stax-path-splitter")
+@DisplayOrder(order = {"path", "encoding", "bufferSize", "xmlDocumentFactoryConfig"})
 public class StaxPathSplitter extends MessageSplitterImp {
   private transient static final int DEFAULT_BUFFER_SIZE = 8192;
   private static final String DEFAULT_XML_ENCODING = "UTF-8";
   private transient Logger log = LoggerFactory.getLogger(this.getClass());
+  
+  // Transformer is quite expensive, so re-use a thread-local copy.
+  private static ThreadLocal<Transformer> transformer = ThreadLocal.withInitial(() -> {
+    return newTransformer();
+  });
 
   @NotBlank
   private String path;
@@ -69,6 +92,13 @@ public class StaxPathSplitter extends MessageSplitterImp {
   @AdvancedConfig
   @InputFieldDefault(value = "UTF-8")
   private String encoding = null;
+  @AdvancedConfig
+  @Valid
+  private DocumentBuilderFactoryBuilder xmlDocumentFactoryConfig;
+
+  @AdvancedConfig
+  @Valid
+  private KeyValuePairSet namespaceContext;
 
   public StaxPathSplitter() {
 
@@ -85,8 +115,11 @@ public class StaxPathSplitter extends MessageSplitterImp {
       String thePath = msg.resolve(getPath());
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
       XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
-      return new AdaptrisMessageStaxSplitGenerator(
-          new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg).withXmlEventReader(reader).withPath(thePath)
+      NamespaceContext nsCtx = SimpleNamespaceContext.create(getNamespaceContext(), msg);
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactoryBuilder.newInstance(getXmlDocumentFactoryConfig(), nsCtx).build();
+      return new DocumentStaxSplitGenerator(
+          new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg)
+              .withDocumentBuilderFactory(dbFactory).withXmlEventReader(reader).withPath(thePath)
               .withInputReader(buf));
     }
     catch (Exception e) {
@@ -111,7 +144,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
     this.bufferSize = b;
   }
 
-  int bufferSize() {
+  protected int bufferSize() {
     return getBufferSize() != null ? getBufferSize().intValue() : DEFAULT_BUFFER_SIZE;
   }
 
@@ -156,64 +189,140 @@ public class StaxPathSplitter extends MessageSplitterImp {
     this.encoding = enc;
   }
 
-  String evaluateEncoding(AdaptrisMessage msg) {
-    String encoding = DEFAULT_XML_ENCODING;
-    if (!isEmpty(getEncoding())) {
-      encoding = getEncoding();
-    }
-    else if (!isEmpty(msg.getContentEncoding())) {
-      encoding = msg.getContentEncoding();
-    }
-    return encoding;
+  public StaxPathSplitter withEncoding(String enc) {
+    setEncoding(enc);
+    return this;
   }
 
+  protected String evaluateEncoding(AdaptrisMessage msg) {
+    return XmlHelper.getXmlEncoding(msg, getEncoding());
+  }
+
+  public DocumentBuilderFactoryBuilder getXmlDocumentFactoryConfig() {
+    return xmlDocumentFactoryConfig;
+  }
+
+  public void setXmlDocumentFactoryConfig(DocumentBuilderFactoryBuilder xml) {
+    this.xmlDocumentFactoryConfig = xml;
+  }
+  
+  public StaxPathSplitter withXmlDocumentFactoryConfig(DocumentBuilderFactoryBuilder builder) {
+    setXmlDocumentFactoryConfig(builder);
+    return this;
+  }
+
+  public KeyValuePairSet getNamespaceContext() {
+    return namespaceContext;
+  }
+
+  public void setNamespaceContext(KeyValuePairSet namespaceContext) {
+    this.namespaceContext = namespaceContext;
+  }
+
+  public StaxPathSplitter withNamespaceContext(KeyValuePairSet namespaceContext) {
+    setNamespaceContext(namespaceContext);
+    return this;
+  }
+
+  private static Transformer newTransformer() {
+    try {
+      return TransformerFactory.newInstance().newTransformer();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   private class AdaptrisMessageStaxSplitGeneratorConfig extends StaxSplitGeneratorConfig {
     AdaptrisMessage originalMessage;
+    DocumentBuilderFactory builder;
+
     AdaptrisMessageStaxSplitGeneratorConfig withOriginalMessage(AdaptrisMessage msg) {
       originalMessage = msg;
       return this;
     }
+
+    AdaptrisMessageStaxSplitGeneratorConfig withDocumentBuilderFactory(DocumentBuilderFactory builder) {
+      this.builder = builder;
+      return this;
+    }
   }
 
+  
+  private class DocumentStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
 
-  private class AdaptrisMessageStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
-
+    private transient DocumentBuilder docBuilder;
     private transient AdaptrisMessageFactory factory;
-    private transient XMLEventFactory eventFactory;
+    private transient String encoding;
 
-    AdaptrisMessageStaxSplitGenerator(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws Exception {
+    DocumentStaxSplitGenerator(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws Exception {
       super(cfg);
-      logR.trace("Using message factory: {}", factory.getClass());
     }
 
     @Override
-    public void init(AdaptrisMessageStaxSplitGeneratorConfig cfg) {
+    public void init(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws ParserConfigurationException {
+      docBuilder = cfg.builder.newDocumentBuilder();
       this.factory = selectFactory(cfg.originalMessage);
-      this.eventFactory = XMLEventFactory.newInstance();
+      this.encoding = evaluateEncoding(cfg.originalMessage);
     }
 
     @Override
-    public AdaptrisMessage generateNextMessage(XMLEvent evt, String elementName) throws Exception {
-      XMLEvent event = evt;
-      if (event == null) return null;
+    public AdaptrisMessage generateNextMessage(XMLEvent event, String elementName) throws Exception {
+      if (event == null) {
+        return null;
+      }
+      Document document = docBuilder.newDocument();
+      createDocument(event, elementName, document, document);
       AdaptrisMessage splitMsg = factory.newMessage();
-      XMLEventWriter xmlWriter = null;
-      String encoding = evaluateEncoding(getConfig().originalMessage);
-      try (Writer w = splitMsg.getWriter(encoding)) {
-        xmlWriter = XMLOutputFactory.newInstance().createXMLEventWriter(w);
-        xmlWriter.add(eventFactory.createStartDocument(encoding, "1.0"));
-        xmlWriter.add(event);
-        while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
-          event = getConfig().getXmlEventReader().nextEvent();
-          xmlWriter.add(event);
-        }
-        xmlWriter.add(eventFactory.createEndDocument());
+      try (OutputStream out = splitMsg.getOutputStream()) {
+        serialize(new DOMSource(document), new StreamResult(out), encoding);
       }
-      finally {
-        StaxUtils.closeQuietly(xmlWriter);
-      }
-      copyMetadata(getConfig().originalMessage, splitMsg);
       return splitMsg;
     }
+
+    private void createDocument(XMLEvent event, String elementName, Document document, Node parentElement) throws Exception {
+      Element currentElement = null;
+      while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
+        switch (event.getEventType()) {
+          case XMLStreamConstants.START_ELEMENT:
+            StartElement se = event.asStartElement();
+            if(currentElement != null){
+              createDocument(event, se.getName().getLocalPart(), document, currentElement);
+            } else {
+              currentElement = createElement(document, se);
+              parentElement.appendChild(currentElement);
+            }
+            break;
+          case XMLStreamConstants.CHARACTERS:
+            if(!event.asCharacters().isWhiteSpace() && currentElement != null){
+              currentElement.setTextContent(event.asCharacters().getData());
+            }
+            break;
+          case XMLStreamConstants.END_ELEMENT:
+            currentElement = null;
+            break;
+        }
+        event = getConfig().getXmlEventReader().nextEvent();
+      }
+    }
+
+    private Element createElement(Document document, StartElement se){
+      Element element = document.createElementNS(se.getName().getNamespaceURI(), se.getName().getLocalPart());
+      Iterator attributes = se.getAttributes();
+      while(attributes.hasNext()){
+        Attribute a = (Attribute)attributes.next();
+        element.setAttribute(a.getName().getLocalPart(), a.getValue());
+      }
+      return element;
+    }
+    
+    private void serialize(DOMSource doc, StreamResult result, String encoding)
+        throws TransformerFactoryConfigurationError, TransformerException {
+      Transformer serializer = transformer.get();
+      serializer.setOutputProperty(OutputKeys.ENCODING, encoding);
+      serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+      serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+      serializer.transform(doc, result);
+    }
+
   }
 }

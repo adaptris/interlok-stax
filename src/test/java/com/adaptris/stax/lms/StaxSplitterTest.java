@@ -72,7 +72,8 @@ public class StaxSplitterTest {
 
   @Test
   public void testSplit_NoSlashPrefix() throws Exception {
-    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document");
+    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withXmlDocumentFactoryConfig(null)
+        .withNamespaceContext(null);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(3, list.size());
@@ -94,8 +95,7 @@ public class StaxSplitterTest {
 
   @Test
   public void testEncoding() throws Exception {
-    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
-    splitter.setEncoding("ISO-8859-1");
+    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document").withEncoding("ISO-8859-1");
     assertEquals("ISO-8859-1", splitter.getEncoding());    
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE, "UTF-8");
     assertEquals("ISO-8859-1", splitter.evaluateEncoding(msg));
