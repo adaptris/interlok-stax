@@ -278,30 +278,31 @@ public class StaxPathSplitter extends MessageSplitterImp {
       return splitMsg;
     }
 
-    private void createDocument(final XMLEvent event, String elementName, Document document, Node parentElement) throws Exception {
+    private void createDocument(final XMLEvent startEvent, String elementName, Document document, Node parentElement)
+        throws Exception {
       Element currentElement = null;
-      XMLEvent currentEvent = event;
-      while (isNotEndElement(currentEvent, elementName) && getConfig().getXmlEventReader().hasNext()) {
+      XMLEvent event = startEvent;
+      while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
         switch (event.getEventType()) {
           case XMLStreamConstants.START_ELEMENT:
-            StartElement se = event.asStartElement();
+          StartElement se = event.asStartElement();
             if(currentElement != null){
-              createDocument(event, se.getName().getLocalPart(), document, currentElement);
+            createDocument(event, se.getName().getLocalPart(), document, currentElement);
             } else {
               currentElement = createElement(document, se);
               parentElement.appendChild(currentElement);
             }
             break;
           case XMLStreamConstants.CHARACTERS:
-            if(!event.asCharacters().isWhiteSpace() && currentElement != null){
-              currentElement.setTextContent(event.asCharacters().getData());
+          if (!event.asCharacters().isWhiteSpace() && currentElement != null) {
+            currentElement.setTextContent(event.asCharacters().getData());
             }
             break;
           case XMLStreamConstants.END_ELEMENT:
             currentElement = null;
             break;
         }
-        currentEvent = getConfig().getXmlEventReader().nextEvent();
+        event = getConfig().getXmlEventReader().nextEvent();
       }
     }
 
