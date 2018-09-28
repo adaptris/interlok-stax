@@ -75,7 +75,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @DisplayOrder(order = {"path", "encoding", "bufferSize", "xmlDocumentFactoryConfig"})
 public class StaxPathSplitter extends MessageSplitterImp {
   private transient static final int DEFAULT_BUFFER_SIZE = 8192;
-  private static final String DEFAULT_XML_ENCODING = "UTF-8";
   private transient Logger log = LoggerFactory.getLogger(this.getClass());
   
   // Transformer is quite expensive, so re-use a thread-local copy.
@@ -279,9 +278,10 @@ public class StaxPathSplitter extends MessageSplitterImp {
       return splitMsg;
     }
 
-    private void createDocument(XMLEvent event, String elementName, Document document, Node parentElement) throws Exception {
+    private void createDocument(final XMLEvent event, String elementName, Document document, Node parentElement) throws Exception {
       Element currentElement = null;
-      while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
+      XMLEvent currentEvent = event;
+      while (isNotEndElement(currentEvent, elementName) && getConfig().getXmlEventReader().hasNext()) {
         switch (event.getEventType()) {
           case XMLStreamConstants.START_ELEMENT:
             StartElement se = event.asStartElement();
@@ -301,7 +301,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
             currentElement = null;
             break;
         }
-        event = getConfig().getXmlEventReader().nextEvent();
+        currentEvent = getConfig().getXmlEventReader().nextEvent();
       }
     }
 
