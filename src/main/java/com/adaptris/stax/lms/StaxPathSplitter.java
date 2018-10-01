@@ -311,10 +311,11 @@ public class StaxPathSplitter extends MessageSplitterImp {
       Iterator attributes = se.getAttributes();
       while(attributes.hasNext()){
         Attribute a = (Attribute)attributes.next();
-        element.setAttribute(a.getName().getLocalPart(), a.getValue());
+        element.setAttributeNS(a.getName().getNamespaceURI(), a.getName().getLocalPart(), a.getValue());
       }
       return element;
     }
+    
     
     private void serialize(DOMSource doc, StreamResult result, String encoding)
         throws TransformerFactoryConfigurationError, TransformerException {
