@@ -275,6 +275,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       try (OutputStream out = splitMsg.getOutputStream()) {
         serialize(new DOMSource(document), new StreamResult(out), encoding);
       }
+      copyMetadata(getConfig().originalMessage, splitMsg);
       return splitMsg;
     }
 

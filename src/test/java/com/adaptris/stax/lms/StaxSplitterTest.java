@@ -17,11 +17,14 @@ package com.adaptris.stax.lms;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import com.adaptris.core.MetadataElement;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -105,6 +108,22 @@ public class StaxSplitterTest {
     msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     assertEquals("UTF-8", splitter.evaluateEncoding(msg));
   }
+
+  @Test
+  public void testSplitCopyMetadata() throws Exception {
+    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE, Collections.singleton(new MetadataElement("key", "value")));
+    List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
+    assertEquals(3, list.size());
+    for (int i = 0; i < list.size(); i++) {
+      XPath xpath = new XPath();
+      Document d = XmlHelper.createDocument(list.get(i), DocumentBuilderFactoryBuilder.newInstance());
+      assertEquals("" + (i + 1), xpath.selectSingleTextItem(d, "/document/nested"));
+      assertTrue(list.get(i).headersContainsKey("key"));
+      assertEquals("value", list.get(i).getMetadataValue("key"));
+    }
+  }
+
 
   protected static List<AdaptrisMessage> toList(Iterable<AdaptrisMessage> iter) {
     if (iter instanceof List) {
