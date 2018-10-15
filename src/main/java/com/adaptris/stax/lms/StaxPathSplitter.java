@@ -86,6 +86,10 @@ public class StaxPathSplitter extends MessageSplitterImp {
   private String path;
 
   @AdvancedConfig
+  @InputFieldDefault(value = "false")
+  private Boolean suppressPathNotFound;
+
+  @AdvancedConfig
   private Integer bufferSize;
 
   @AdvancedConfig
@@ -119,6 +123,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       return new DocumentStaxSplitGenerator(
           new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg)
               .withDocumentBuilderFactory(dbFactory).withXmlEventReader(reader).withPath(thePath)
+              .withSuppressPathNotFound(suppressPathNotFound())
               .withInputReader(buf));
     }
     catch (Exception e) {
@@ -221,6 +226,18 @@ public class StaxPathSplitter extends MessageSplitterImp {
   public StaxPathSplitter withNamespaceContext(KeyValuePairSet namespaceContext) {
     setNamespaceContext(namespaceContext);
     return this;
+  }
+
+  public Boolean getSuppressPathNotFound() {
+    return suppressPathNotFound;
+  }
+
+  public void setSuppressPathNotFound(Boolean suppressPathNotFound) {
+    this.suppressPathNotFound = suppressPathNotFound;
+  }
+
+  private boolean suppressPathNotFound(){
+    return getSuppressPathNotFound() != null ? getSuppressPathNotFound() : false;
   }
 
   private static Transformer newTransformer() {

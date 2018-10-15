@@ -65,6 +65,15 @@ public class StaxSplitterTest {
     splitter.splitMessage(msg);
   }
 
+  @Test
+  public void testSplit_NotFound_Suppress() throws Exception {
+    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document/x");
+    splitter.setSuppressPathNotFound(true);
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
+    List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
+    assertEquals(0, list.size());
+  }
+
   @Test(expected = UnsupportedOperationException.class)
   public void testSplit_Remove() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
