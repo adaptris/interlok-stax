@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.adaptris.core.MetadataElement;
@@ -122,6 +123,18 @@ public class StaxSplitterTest {
       assertTrue(list.get(i).headersContainsKey("key"));
       assertEquals("value", list.get(i).getMetadataValue("key"));
     }
+  }
+
+  @Test(expected = CoreException.class)
+  public void testSplit_DoubleIterator() throws Exception {
+    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document/x");
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
+    Iterable<AdaptrisMessage> iterable = splitter.splitMessage(msg);
+    for (Iterator<AdaptrisMessage> i =  iterable.iterator(); i.hasNext();) {
+      i.next();
+    }
+    // This should throw an IllegalState
+    Iterator<AdaptrisMessage> i =  iterable.iterator();  
   }
 
 

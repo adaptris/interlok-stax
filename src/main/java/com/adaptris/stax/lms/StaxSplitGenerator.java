@@ -18,6 +18,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
   private transient S config;
   private transient String elementToSplitOn;
   private transient T nextMessage;
+  private boolean iteratorInvoked = false;
 
   public StaxSplitGenerator(S cfg) throws Exception {
     this.config = cfg;
@@ -46,6 +47,10 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
 
   @Override
   public Iterator<T> iterator() {
+    if (iteratorInvoked) {
+      throw new IllegalStateException("iterator already invoked");
+    }
+    iteratorInvoked = true;
     return this;
   }
 
