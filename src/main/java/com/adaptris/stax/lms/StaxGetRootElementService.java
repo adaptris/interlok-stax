@@ -7,6 +7,8 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.ServiceImp;
+import com.adaptris.core.util.ExceptionHelper;
+import com.adaptris.stax.StaxUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -35,15 +37,18 @@ public class StaxGetRootElementService extends ServiceImp {
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
-    try {
-      BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
-      XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
+    XMLEventReader reader = null;
+    try (BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize())) {
+      reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
       String value = getRootValue(reader);
-      if(value != null){
+      if (value != null) {
         msg.addMetadata(getMetadataKey(), value);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
+    }
+    catch (Exception e) {
+      throw ExceptionHelper.wrapServiceException(e);
+    } finally {
+      StaxUtils.closeQuietly(reader);
     }
   }
 
