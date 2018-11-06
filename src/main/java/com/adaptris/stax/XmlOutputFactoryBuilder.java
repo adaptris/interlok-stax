@@ -16,19 +16,17 @@
 
 package com.adaptris.stax;
 
-import static com.adaptris.stax.StaxUtils.closeQuietly;
-
 import java.io.Writer;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
- * Pluggable implementation for building specific {@link XMLStreamWriter} instances.
+ * Pluggable implementation for building specific {@link XMLOutputFactory} instances.
  * 
  *
  */
-public interface XmlOutputFactoryBuilder {
+public interface XmlOutputFactoryBuilder extends StreamWriterFactory {
 
   /**
    * Create an output factory.
@@ -47,13 +45,5 @@ public interface XmlOutputFactoryBuilder {
    */
   default XMLStreamWriter create(Writer w) throws Exception {
     return build().createXMLStreamWriter(w);
-  }
-
-  /**
-   * Close the {@link XMLStreamWriter} and any other resources.
-   * 
-   */
-  default void close(XMLStreamWriter w) {
-    closeQuietly(w);
   }
 }

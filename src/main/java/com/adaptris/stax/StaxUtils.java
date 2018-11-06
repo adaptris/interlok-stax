@@ -55,7 +55,7 @@ public abstract class StaxUtils {
   }
 
   /**
-   * Create an XMLInputFactory with {@link XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES} as false
+   * Create an XMLInputFactory with {@link XMLInputFactory#IS_SUPPORTING_EXTERNAL_ENTITIES} as false
    */
   public static XMLInputFactory createInputFactory() {
     XMLInputFactory factory = XMLInputFactory.newFactory();
