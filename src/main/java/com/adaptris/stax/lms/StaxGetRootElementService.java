@@ -1,5 +1,14 @@
 package com.adaptris.stax.lms;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
+import javax.validation.Valid;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.events.XMLEvent;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.AffectsMetadata;
 import com.adaptris.annotation.ComponentProfile;
@@ -9,14 +18,8 @@ import com.adaptris.core.ServiceException;
 import com.adaptris.core.ServiceImp;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
+import com.adaptris.stax.StreamInputFactory;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.events.XMLEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 
 /**
  * @config stax-get-root-element
@@ -34,12 +37,15 @@ public class StaxGetRootElementService extends ServiceImp {
 
   @AdvancedConfig
   private Integer bufferSize;
+  @AdvancedConfig
+  @Valid
+  private StreamInputFactory inputFactoryBuilder;
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
     XMLEventReader reader = null;
     try (BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize())) {
-      reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
+      reader = StreamInputFactory.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
       String value = getRootValue(reader);
       if (value != null) {
         msg.addMetadata(getMetadataKey(), value);
@@ -104,5 +110,18 @@ public class StaxGetRootElementService extends ServiceImp {
 
   public void setMetadataKey(String metadataKey) {
     this.metadataKey = metadataKey;
+  }
+
+  public StreamInputFactory getInputFactoryBuilder() {
+    return inputFactoryBuilder;
+  }
+
+  public void setInputFactoryBuilder(StreamInputFactory inputFactoryBuilder) {
+    this.inputFactoryBuilder = inputFactoryBuilder;
+  }
+
+  public StaxGetRootElementService withInputFactoryBuilder(StreamInputFactory b) {
+    setInputFactoryBuilder(b);
+    return this;
   }
 }

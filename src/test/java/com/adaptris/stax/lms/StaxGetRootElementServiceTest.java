@@ -1,9 +1,10 @@
 package com.adaptris.stax.lms;
 
+import org.junit.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ServiceCase;
-import org.junit.Test;
 
 /**
  * @author mwarman
@@ -30,7 +31,7 @@ public class StaxGetRootElementServiceTest extends ServiceCase {
 
   @Override
   protected Object retrieveObjectForSampleConfig() {
-    StaxGetRootElementService service = new StaxGetRootElementService();
+    StaxGetRootElementService service = new StaxGetRootElementService().withInputFactoryBuilder(null);
     service.setMetadataKey("rootElement");
     return service;
   }

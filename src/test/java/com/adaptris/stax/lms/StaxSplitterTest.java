@@ -25,13 +25,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.adaptris.core.MetadataElement;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
+import com.adaptris.core.MetadataElement;
 import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.XmlHelper;
@@ -47,7 +47,7 @@ public class StaxSplitterTest {
 
   @Test
   public void testSplit() throws Exception {
-    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
+    StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document").withInputFactoryBuilder(null);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(3, list.size());

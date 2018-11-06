@@ -18,10 +18,11 @@ package com.adaptris.stax.lms;
 
 import java.io.InputStream;
 
+import javax.validation.Valid;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.events.XMLEvent;
 
+import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
@@ -29,6 +30,7 @@ import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
+import com.adaptris.stax.StreamInputFactory;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -54,6 +56,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @ComponentProfile(summary = "Write the current message as XML output via STaX", tag = "service,transform,xml", since = "3.6.6")
 public class StaxWriteElement extends StaxXmlOutput {
 
+  @AdvancedConfig
+  @Valid
+  private StreamInputFactory inputFactoryBuilder;
+
   public StaxWriteElement() {
 
   }
@@ -64,7 +70,7 @@ public class StaxWriteElement extends StaxXmlOutput {
     try {
       StaxOutputWrapper wrapper = unwrap(msg);
       try (InputStream in = msg.getInputStream()) {
-        reader = XMLInputFactory.newInstance().createXMLEventReader(in);
+        reader = StreamInputFactory.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(in);
         while (reader.hasNext()) {
           XMLEvent evt = reader.nextEvent();
           if (emit(evt)) {
@@ -91,4 +97,16 @@ public class StaxWriteElement extends StaxXmlOutput {
     return true;
   }
 
+  public StreamInputFactory getInputFactoryBuilder() {
+    return inputFactoryBuilder;
+  }
+
+  public void setInputFactoryBuilder(StreamInputFactory inputFactoryBuilder) {
+    this.inputFactoryBuilder = inputFactoryBuilder;
+  }
+
+  public StaxWriteElement withInputFactoryBuilder(StreamInputFactory b) {
+    setInputFactoryBuilder(b);
+    return this;
+  }
 }

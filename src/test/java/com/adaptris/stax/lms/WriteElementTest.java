@@ -102,6 +102,6 @@ public class WriteElementTest extends ServiceCase {
 
   @Override
   protected StaxWriteElement retrieveObjectForSampleConfig() {
-    return new StaxWriteElement();
+    return new StaxWriteElement().withInputFactoryBuilder(null);
   }
 }
