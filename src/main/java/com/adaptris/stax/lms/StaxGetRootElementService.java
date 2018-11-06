@@ -18,7 +18,7 @@ import com.adaptris.core.ServiceException;
 import com.adaptris.core.ServiceImp;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
-import com.adaptris.stax.StreamInputFactory;
+import com.adaptris.stax.XmlInputFactoryBuilder;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -39,13 +39,13 @@ public class StaxGetRootElementService extends ServiceImp {
   private Integer bufferSize;
   @AdvancedConfig
   @Valid
-  private StreamInputFactory inputFactoryBuilder;
+  private XmlInputFactoryBuilder inputFactoryBuilder;
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
     XMLEventReader reader = null;
     try (BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize())) {
-      reader = StreamInputFactory.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
+      reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
       String value = getRootValue(reader);
       if (value != null) {
         msg.addMetadata(getMetadataKey(), value);
@@ -112,15 +112,15 @@ public class StaxGetRootElementService extends ServiceImp {
     this.metadataKey = metadataKey;
   }
 
-  public StreamInputFactory getInputFactoryBuilder() {
+  public XmlInputFactoryBuilder getInputFactoryBuilder() {
     return inputFactoryBuilder;
   }
 
-  public void setInputFactoryBuilder(StreamInputFactory inputFactoryBuilder) {
+  public void setInputFactoryBuilder(XmlInputFactoryBuilder inputFactoryBuilder) {
     this.inputFactoryBuilder = inputFactoryBuilder;
   }
 
-  public StaxGetRootElementService withInputFactoryBuilder(StreamInputFactory b) {
+  public StaxGetRootElementService withInputFactoryBuilder(XmlInputFactoryBuilder b) {
     setInputFactoryBuilder(b);
     return this;
   }

@@ -57,7 +57,7 @@ import com.adaptris.core.util.Args;
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.core.util.XmlHelper;
-import com.adaptris.stax.StreamInputFactory;
+import com.adaptris.stax.XmlInputFactoryBuilder;
 import com.adaptris.util.KeyValuePairSet;
 import com.adaptris.util.text.xml.SimpleNamespaceContext;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -102,7 +102,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
 
   @AdvancedConfig
   @Valid
-  private StreamInputFactory inputFactoryBuilder;
+  private XmlInputFactoryBuilder inputFactoryBuilder;
 
   @AdvancedConfig
   @Valid
@@ -123,7 +123,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
     try {
       String thePath = msg.resolve(getPath());
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
-      XMLEventReader reader = StreamInputFactory.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
+      XMLEventReader reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
       NamespaceContext nsCtx = SimpleNamespaceContext.create(getNamespaceContext(), msg);
       DocumentBuilderFactory dbFactory = DocumentBuilderFactoryBuilder.newInstance(getXmlDocumentFactoryConfig(), nsCtx).build();
       return new DocumentStaxSplitGenerator(
@@ -246,15 +246,15 @@ public class StaxPathSplitter extends MessageSplitterImp {
     return BooleanUtils.toBooleanDefaultIfNull(getSuppressPathNotFound(), false);
   }
 
-  public StreamInputFactory getInputFactoryBuilder() {
+  public XmlInputFactoryBuilder getInputFactoryBuilder() {
     return inputFactoryBuilder;
   }
 
-  public void setInputFactoryBuilder(StreamInputFactory inputFactoryBuilder) {
+  public void setInputFactoryBuilder(XmlInputFactoryBuilder inputFactoryBuilder) {
     this.inputFactoryBuilder = inputFactoryBuilder;
   }
 
-  public StaxPathSplitter withInputFactoryBuilder(StreamInputFactory b) {
+  public StaxPathSplitter withInputFactoryBuilder(XmlInputFactoryBuilder b) {
     setInputFactoryBuilder(b);
     return this;
   }

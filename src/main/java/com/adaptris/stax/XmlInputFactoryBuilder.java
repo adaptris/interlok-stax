@@ -23,9 +23,9 @@ import javax.xml.stream.XMLInputFactory;
  *
  */
 @FunctionalInterface
-public interface StreamInputFactory {
+public interface XmlInputFactoryBuilder {
 
-  static StreamInputFactory defaultIfNull(StreamInputFactory b) {
+  static XmlInputFactoryBuilder defaultIfNull(XmlInputFactoryBuilder b) {
     return b != null ? b : () -> {
       return StaxUtils.createInputFactory();
     };

@@ -30,7 +30,7 @@ import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.stax.StaxUtils;
-import com.adaptris.stax.StreamInputFactory;
+import com.adaptris.stax.XmlInputFactoryBuilder;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
@@ -58,7 +58,7 @@ public class StaxWriteElement extends StaxXmlOutput {
 
   @AdvancedConfig
   @Valid
-  private StreamInputFactory inputFactoryBuilder;
+  private XmlInputFactoryBuilder inputFactoryBuilder;
 
   public StaxWriteElement() {
 
@@ -70,7 +70,7 @@ public class StaxWriteElement extends StaxXmlOutput {
     try {
       StaxOutputWrapper wrapper = unwrap(msg);
       try (InputStream in = msg.getInputStream()) {
-        reader = StreamInputFactory.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(in);
+        reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(in);
         while (reader.hasNext()) {
           XMLEvent evt = reader.nextEvent();
           if (emit(evt)) {
@@ -97,15 +97,15 @@ public class StaxWriteElement extends StaxXmlOutput {
     return true;
   }
 
-  public StreamInputFactory getInputFactoryBuilder() {
+  public XmlInputFactoryBuilder getInputFactoryBuilder() {
     return inputFactoryBuilder;
   }
 
-  public void setInputFactoryBuilder(StreamInputFactory inputFactoryBuilder) {
+  public void setInputFactoryBuilder(XmlInputFactoryBuilder inputFactoryBuilder) {
     this.inputFactoryBuilder = inputFactoryBuilder;
   }
 
-  public StaxWriteElement withInputFactoryBuilder(StreamInputFactory b) {
+  public StaxWriteElement withInputFactoryBuilder(XmlInputFactoryBuilder b) {
     setInputFactoryBuilder(b);
     return this;
   }

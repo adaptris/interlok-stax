@@ -16,12 +16,11 @@
 
 package com.adaptris.stax;
 
-import java.io.Writer;
 import java.util.Arrays;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLOutputFactory;
 
 import com.adaptris.annotation.AutoPopulated;
 import com.adaptris.annotation.InputFieldDefault;
@@ -31,20 +30,16 @@ import com.adaptris.util.KeyValuePairSet;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- * {@link StreamWriterFactory} implementation that uses {@code net.sf.saxon.s9api.Serializer#getXMLStreamWriter()}.
+ * {@link XmlOutputFactoryBuilder} implementation that uses {@code net.sf.saxon.lib.SerializerFactory#getXMLStreamWriter()}.
  * 
  * <p>
- * Using this factory allows to configure various Saxon output properties (such as INDENT) to
+ * Using this factory allows to configure various Saxon output properties.
  * 
  * @config stax-saxon-stream-writer
  */
 @XStreamAlias("stax-saxon-stream-writer")
-public class SaxonStreamWriterFactory extends StreamWriterFactoryImpl {
-  private transient static InheritableThreadLocal<SaxonWriterImpl> myFactory = new InheritableThreadLocal<SaxonWriterImpl>() {
-    public SaxonWriterImpl initialValue() {
-      return new SaxonWriterImpl();
-    }
-  };
+public class SaxonStreamWriterFactory implements XmlOutputFactoryBuilder {
+  private transient static InheritableThreadLocal<SaxonWriterImpl> myFactory = new InheritableThreadLocal<SaxonWriterImpl>();;
 
   @NotNull
   @AutoPopulated
@@ -67,15 +62,11 @@ public class SaxonStreamWriterFactory extends StreamWriterFactoryImpl {
   }
 
   @Override
-  public XMLStreamWriter create(Writer w) throws Exception {
-    return myFactory.get().create(w, getOutputProperties());
-  }
-
-
-  @Override
-  public void close(XMLStreamWriter w) {
-    super.close(w);
-    myFactory.get().close();
+  public synchronized XMLOutputFactory build() {
+    if (myFactory.get() == null) {
+      myFactory.set(new SaxonWriterImpl(getOutputProperties()));
+    }    
+    return myFactory.get();
   }
 
   /**
@@ -88,9 +79,8 @@ public class SaxonStreamWriterFactory extends StreamWriterFactoryImpl {
   /**
    * Set any output properties required.
    * <p>
-   * The keys should match the enums specified by {@code net.sf.saxon.s9api.Serializer.Property}; bear in mind no validation is done
-   * on the values. For instance {@code INDENT=yes} would effectively invoke
-   * {@code Serializer#setOutputProperty(Serializer.Property.INDENT, "yes")}.
+   * The keys should match the properties specified by {@code SaxonOutputKeys}; bear in mind no validation is done on the values or
+   * the license required for those features.
    * </p>
    * 
    * @param kvps any output properties to set
@@ -98,4 +88,5 @@ public class SaxonStreamWriterFactory extends StreamWriterFactoryImpl {
   public void setOutputProperties(KeyValuePairSet kvps) {
     this.outputProperties = Args.notNull(kvps, "outputProperties");
   }
+
 }

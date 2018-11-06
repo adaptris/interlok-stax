@@ -30,6 +30,7 @@ import org.junit.Test;
 import com.adaptris.util.KeyValuePair;
 import com.adaptris.util.KeyValuePairSet;
 
+import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.s9api.Serializer;
 
 public class SaxonWriterFactoryTest {
@@ -45,6 +46,7 @@ public class SaxonWriterFactoryTest {
   public void testCreate() throws Exception {
     SaxonStreamWriterFactory factory = new SaxonStreamWriterFactory(new KeyValuePair(Serializer.Property.INDENT.name(), "yes"),
         new KeyValuePair("not-known", "false"));
+    assertNotNull(factory.create(new StringWriter()));
     assertNotNull(factory.create(new StringWriter()));
   }
 
@@ -64,12 +66,12 @@ public class SaxonWriterFactoryTest {
     assertEquals(0, factory.getOutputProperties().size());
 
     KeyValuePairSet kvps = new KeyValuePairSet();
-    kvps.add(new KeyValuePair(Serializer.Property.INDENT.name(), "yes"));
+    kvps.add(new KeyValuePair(SaxonOutputKeys.INDENT_SPACES, "2"));
     factory = new SaxonStreamWriterFactory(kvps);
     assertEquals(1, factory.getOutputProperties().size());
     assertEquals(kvps, factory.getOutputProperties());
 
-    factory = new SaxonStreamWriterFactory(new KeyValuePair(Serializer.Property.INDENT.name(), "yes"));
+    factory = new SaxonStreamWriterFactory(new KeyValuePair(SaxonOutputKeys.INDENT_SPACES, "2"));
     assertEquals(1, factory.getOutputProperties().size());
 
   }

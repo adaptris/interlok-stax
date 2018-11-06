@@ -29,12 +29,12 @@ import com.adaptris.util.KeyValuePairSet;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- * Default implementation of {@link StreamInputFactory}.
+ * Default implementation of {@link XmlInputFactoryBuilder}.
  * 
  * @config stax-default-stream-input
  */
 @XStreamAlias("stax-default-stream-input")
-public class DefaultInputFactory implements StreamInputFactory {
+public class DefaultInputFactory implements XmlInputFactoryBuilder {
   // Boolean properties as implied by XMLInputFactory
   private static final List<String> BOOLEAN_PROPERTIES = Arrays.asList(new String[]
   {
