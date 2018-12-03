@@ -26,7 +26,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
@@ -39,6 +38,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +57,7 @@ import com.adaptris.core.util.Args;
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.core.util.XmlHelper;
+import com.adaptris.stax.XmlInputFactoryBuilder;
 import com.adaptris.util.KeyValuePairSet;
 import com.adaptris.util.text.xml.SimpleNamespaceContext;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -86,6 +87,10 @@ public class StaxPathSplitter extends MessageSplitterImp {
   private String path;
 
   @AdvancedConfig
+  @InputFieldDefault(value = "false")
+  private Boolean suppressPathNotFound;
+
+  @AdvancedConfig
   private Integer bufferSize;
 
   @AdvancedConfig
@@ -97,7 +102,12 @@ public class StaxPathSplitter extends MessageSplitterImp {
 
   @AdvancedConfig
   @Valid
+  private XmlInputFactoryBuilder inputFactoryBuilder;
+
+  @AdvancedConfig
+  @Valid
   private KeyValuePairSet namespaceContext;
+
 
   public StaxPathSplitter() {
 
@@ -113,12 +123,13 @@ public class StaxPathSplitter extends MessageSplitterImp {
     try {
       String thePath = msg.resolve(getPath());
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
-      XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
+      XMLEventReader reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
       NamespaceContext nsCtx = SimpleNamespaceContext.create(getNamespaceContext(), msg);
       DocumentBuilderFactory dbFactory = DocumentBuilderFactoryBuilder.newInstance(getXmlDocumentFactoryConfig(), nsCtx).build();
       return new DocumentStaxSplitGenerator(
           new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg)
               .withDocumentBuilderFactory(dbFactory).withXmlEventReader(reader).withPath(thePath)
+              .withSuppressPathNotFound(suppressPathNotFound())
               .withInputReader(buf));
     }
     catch (Exception e) {
@@ -223,6 +234,31 @@ public class StaxPathSplitter extends MessageSplitterImp {
     return this;
   }
 
+  public Boolean getSuppressPathNotFound() {
+    return suppressPathNotFound;
+  }
+
+  public void setSuppressPathNotFound(Boolean suppressPathNotFound) {
+    this.suppressPathNotFound = suppressPathNotFound;
+  }
+
+  private boolean suppressPathNotFound(){
+    return BooleanUtils.toBooleanDefaultIfNull(getSuppressPathNotFound(), false);
+  }
+
+  public XmlInputFactoryBuilder getInputFactoryBuilder() {
+    return inputFactoryBuilder;
+  }
+
+  public void setInputFactoryBuilder(XmlInputFactoryBuilder inputFactoryBuilder) {
+    this.inputFactoryBuilder = inputFactoryBuilder;
+  }
+
+  public StaxPathSplitter withInputFactoryBuilder(XmlInputFactoryBuilder b) {
+    setInputFactoryBuilder(b);
+    return this;
+  }
+
   private static Transformer newTransformer() {
     try {
       return TransformerFactory.newInstance().newTransformer();
@@ -230,7 +266,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       throw new RuntimeException(e);
     }
   }
-  
+
   private class AdaptrisMessageStaxSplitGeneratorConfig extends StaxSplitGeneratorConfig {
     AdaptrisMessage originalMessage;
     DocumentBuilderFactory builder;
@@ -275,6 +311,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
       try (OutputStream out = splitMsg.getOutputStream()) {
         serialize(new DOMSource(document), new StreamResult(out), encoding);
       }
+      copyMetadata(getConfig().originalMessage, splitMsg);
       return splitMsg;
     }
 
@@ -282,6 +319,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
         throws Exception {
       Element currentElement = null;
       XMLEvent event = startEvent;
+      StringBuilder text = new StringBuilder();
       while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
         switch (event.getEventType()) {
           case XMLStreamConstants.START_ELEMENT:
@@ -294,11 +332,13 @@ public class StaxPathSplitter extends MessageSplitterImp {
             }
             break;
           case XMLStreamConstants.CHARACTERS:
-          if (!event.asCharacters().isWhiteSpace() && currentElement != null) {
-            currentElement.setTextContent(event.asCharacters().getData());
+            if (!event.asCharacters().isWhiteSpace() && currentElement != null) {
+              text.append(event.asCharacters().getData());
+              currentElement.setTextContent(text.toString());
             }
             break;
           case XMLStreamConstants.END_ELEMENT:
+            text = new StringBuilder();
             currentElement = null;
             break;
         }
@@ -327,4 +367,6 @@ public class StaxPathSplitter extends MessageSplitterImp {
     }
 
   }
+
+
 }

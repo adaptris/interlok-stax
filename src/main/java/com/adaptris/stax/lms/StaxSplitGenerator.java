@@ -16,8 +16,9 @@ import com.adaptris.core.util.CloseableIterable;
 public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> implements CloseableIterable<T>, Iterator<T> {
 
   private transient S config;
-  private transient String elementToSplitOn;
+  private transient String elementToSplitOn = null;
   private transient T nextMessage;
+  private boolean iteratorInvoked = false;
 
   public StaxSplitGenerator(S cfg) throws Exception {
     this.config = cfg;
@@ -32,9 +33,13 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
       found = nextMatching(s);
     }
     if (found == null) {
-      throw new CoreException("Could not traverse to " + config.getPath());
+      if(!config.getSuppressPathNotFound()) {
+        throw new CoreException("Could not traverse to " + config.getPath());
+      }
     }
-    elementToSplitOn = ((StartElement) found).getName().getLocalPart();
+    if(found != null){
+      elementToSplitOn = ((StartElement) found).getName().getLocalPart();
+    }
     nextMessage = generateNextMessage(found, elementToSplitOn);
   }
 
@@ -46,6 +51,10 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
 
   @Override
   public Iterator<T> iterator() {
+    if (iteratorInvoked) {
+      throw new IllegalStateException("iterator already invoked");
+    }
+    iteratorInvoked = true;
     return this;
   }
 

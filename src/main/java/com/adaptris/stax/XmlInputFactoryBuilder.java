@@ -15,29 +15,26 @@
 */
 package com.adaptris.stax;
 
-import static com.adaptris.stax.StaxUtils.closeQuietly;
-
-import java.io.Writer;
-
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLInputFactory;
 
 /**
+ * Create XMLInputFactory instances.
  * 
- * Pluggable implementation for building specific {@link XMLStreamWriter} instances.
+ *
  */
-public interface StreamWriterFactory {
-  /**
-   * Create a {@link XMLStreamWriter} that wraps the specified writer.
-   * 
-   * 
-   */
-  XMLStreamWriter create(Writer w) throws Exception;
+@FunctionalInterface
+public interface XmlInputFactoryBuilder {
+
+  static XmlInputFactoryBuilder defaultIfNull(XmlInputFactoryBuilder b) {
+    return b != null ? b : () -> {
+      return StaxUtils.createInputFactory();
+    };
+  }
 
   /**
-   * Close the {@link XMLStreamWriter} and any other resources.
+   * Build an XMLInputFactory.
    * 
+   * @return a configured XMLInputFactoryInstance
    */
-  default void close(XMLStreamWriter w) {
-    closeQuietly(w);
-  }
+  XMLInputFactory build();
 }

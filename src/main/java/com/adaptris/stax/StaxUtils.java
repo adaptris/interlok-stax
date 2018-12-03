@@ -18,6 +18,7 @@ package com.adaptris.stax;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamWriter;
 
 public abstract class StaxUtils {
@@ -52,4 +53,14 @@ public abstract class StaxUtils {
 
     }
   }
+
+  /**
+   * Create an XMLInputFactory with {@link XMLInputFactory#IS_SUPPORTING_EXTERNAL_ENTITIES} as false
+   */
+  public static XMLInputFactory createInputFactory() {
+    XMLInputFactory factory = XMLInputFactory.newFactory();
+    factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+    return factory;
+  }
+
 }

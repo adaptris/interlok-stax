@@ -8,6 +8,11 @@ public abstract class StaxSplitGeneratorConfig {
   private String path;
   private XMLEventReader xmlReader;
   private Reader inputReader;
+  private boolean suppressPathNotFound;
+
+  public StaxSplitGeneratorConfig(){
+    suppressPathNotFound = false;
+  }
 
   @SuppressWarnings("unchecked")
   public <T extends StaxSplitGeneratorConfig> T withPath(String s) {
@@ -57,5 +62,15 @@ public abstract class StaxSplitGeneratorConfig {
 
   public Reader getInputReader() {
     return inputReader;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T extends StaxSplitGeneratorConfig> T withSuppressPathNotFound(boolean suppressPathNotFound) {
+    this.suppressPathNotFound = suppressPathNotFound;
+    return (T) this;
+  }
+
+  public boolean getSuppressPathNotFound() {
+    return suppressPathNotFound;
   }
 }
