@@ -12,31 +12,24 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-*/
+ */
 
 package com.adaptris.stax;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.adaptris.util.KeyValuePairBag;
 import com.adaptris.util.KeyValuePairSet;
-
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SerializerFactory;
 
@@ -44,6 +37,7 @@ import net.sf.saxon.lib.SerializerFactory;
 // Of course if you actually configure a SaxonStreamWriterFactory, then there will be a NoClassDef
 class SaxonWriterImpl extends XMLOutputFactory {
   private transient static InheritableThreadLocal<SerializerFactory> mySerializer = new InheritableThreadLocal<SerializerFactory>() {
+    @Override
     protected SerializerFactory initialValue() {
       return new SerializerFactory(Configuration.newConfiguration());
     }
@@ -83,6 +77,7 @@ class SaxonWriterImpl extends XMLOutputFactory {
     }
   }
 
+  @Override
   public XMLStreamWriter createXMLStreamWriter(Result result) throws XMLStreamException {
     throw new UnsupportedOperationException();
   }
@@ -94,17 +89,17 @@ class SaxonWriterImpl extends XMLOutputFactory {
 
   @Override
   public XMLEventWriter createXMLEventWriter(OutputStream stream) throws XMLStreamException {
-    return new DummyEventWriter();
+    return new SaxonEventWriter(createXMLStreamWriter(stream));
   }
 
   @Override
   public XMLEventWriter createXMLEventWriter(OutputStream stream, String encoding) throws XMLStreamException {
-    return new DummyEventWriter();
+    return new SaxonEventWriter(createXMLStreamWriter(stream, encoding));
   }
 
   @Override
   public XMLEventWriter createXMLEventWriter(Writer stream) throws XMLStreamException {
-    return new DummyEventWriter();
+    return new SaxonEventWriter(createXMLStreamWriter(stream));
   }
 
   @Override
@@ -127,51 +122,5 @@ class SaxonWriterImpl extends XMLOutputFactory {
       return (XMLStreamException) e;
     }
     return new XMLStreamException(e);
-  }
-
-  protected class DummyEventWriter implements XMLEventWriter {
-
-    public DummyEventWriter() {
-    }
-
-    @Override
-    public void add(XMLEvent event) throws XMLStreamException {
-      throw new XMLStreamException("Cannot write event " + event);
-    }
-
-    @Override
-    public void add(XMLEventReader reader) throws XMLStreamException {
-      throw new XMLStreamException("Cannot add reader");
-    }
-
-    @Override
-    public void close() throws XMLStreamException {
-    }
-
-    @Override
-    public void flush() throws XMLStreamException {
-    }
-
-    @Override
-    public NamespaceContext getNamespaceContext() {
-      return null;
-    }
-
-    @Override
-    public String getPrefix(String uri) throws XMLStreamException {
-      return null;
-    }
-
-    @Override
-    public void setDefaultNamespace(String uri) throws XMLStreamException {
-    }
-
-    @Override
-    public void setNamespaceContext(NamespaceContext ctxt) throws XMLStreamException {
-    }
-
-    @Override
-    public void setPrefix(String prefix, String uri) throws XMLStreamException {
-    }
   }
 }
