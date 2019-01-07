@@ -1,6 +1,6 @@
 package com.adaptris.stax;
 
-import static com.adaptris.stax.StaxUtils.*;
+import static com.adaptris.stax.StaxUtils.closeQuietly;
 
 import java.io.InputStream;
 import java.io.OutputStream;
