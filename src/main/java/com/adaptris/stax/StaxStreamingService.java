@@ -2,6 +2,8 @@ package com.adaptris.stax;
 
 import static com.adaptris.stax.StaxUtils.closeQuietly;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -38,7 +40,8 @@ public class StaxStreamingService extends ServiceImp {
   public void doService(AdaptrisMessage msg) throws ServiceException {
     XMLEventReader reader = null;
     XMLEventWriter writer = null;
-    try (InputStream in = msg.getInputStream(); OutputStream out = msg.getOutputStream()) {
+    try (InputStream in = new BufferedInputStream(msg.getInputStream());
+        OutputStream out = new BufferedOutputStream(msg.getOutputStream())) {
       reader = inputBuilder().build().createXMLEventReader(in);
       writer = outputBuilder().build().createXMLEventWriter(out);
       writer.add(reader);
