@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 
+import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ServiceException;
@@ -26,8 +27,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * </p>
  * 
  * @config stax-streaming-service
+ * @since 3.8.3
  */
 @XStreamAlias("stax-streaming-service")
+@ComponentProfile(summary = "Use STaX to stream from one format to another", tag = "service,stax,transform,xml,json", since="3.8.3")
 public class StaxStreamingService extends ServiceImp {
 
   private static XmlInputFactoryBuilder defaultInputBuilder = new DefaultInputFactory();
