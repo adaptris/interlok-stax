@@ -32,8 +32,6 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 /**
  * {@link XmlOutputFactoryBuilder} implementation that uses {@code net.sf.saxon.lib.SerializerFactory#getXMLStreamWriter()}.
  * 
- * <p>
- * Using this factory allows to configure various Saxon output properties.
  * 
  * @config stax-saxon-stream-writer
  */

@@ -27,7 +27,7 @@ import javax.xml.stream.XMLStreamWriter;
  *
  */
 public interface XmlOutputFactoryBuilder extends StreamWriterFactory {
-
+  
   /**
    * Create an output factory.
    * 
@@ -38,9 +38,6 @@ public interface XmlOutputFactoryBuilder extends StreamWriterFactory {
   /**
    * Create a {@link XMLStreamWriter} that wraps the specified writer.
    * 
-   * <p>
-   * This is simply for convenience
-   * </p>
    * 
    */
   default XMLStreamWriter create(Writer w) throws Exception {
