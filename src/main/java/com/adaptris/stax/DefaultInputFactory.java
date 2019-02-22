@@ -84,7 +84,7 @@ public class DefaultInputFactory implements XmlInputFactoryBuilder {
    * @param factory the {@code XMLInputFactory} that needs configuring
    * @param properties the properties, if null, a safe default is assumed.
    * @return a configured XMLInputFactory instance.
-   * @see XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES
+   * @see XMLInputFactory#IS_SUPPORTING_EXTERNAL_ENTITIES
    */
   protected static XMLInputFactory configure(XMLInputFactory factory, KeyValuePairSet properties) {
     Args.notNull(factory, "xml-input-factory");

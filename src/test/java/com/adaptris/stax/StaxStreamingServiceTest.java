@@ -1,8 +1,6 @@
 package com.adaptris.stax;
 
-import org.junit.Test;
 import org.w3c.dom.Document;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ServiceCase;
@@ -36,7 +34,9 @@ public class StaxStreamingServiceTest extends ServiceCase {
   
   public void testDoService() throws Exception{
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
-    StaxStreamingService service = new StaxStreamingService().withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new DefaultWriterFactory());
+    StaxStreamingService service =
+        new StaxStreamingService().withInputBuilder(new DefaultInputFactory())
+            .withOutputBuilder(new SaxonStreamWriterFactory());
     execute(service, msg);
     XPath xpath = new XPath();
     Document d = XmlHelper.createDocument(msg, DocumentBuilderFactoryBuilder.newInstance());

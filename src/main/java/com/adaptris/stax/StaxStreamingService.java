@@ -1,15 +1,14 @@
 package com.adaptris.stax;
 
 import static com.adaptris.stax.StaxUtils.closeQuietly;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
-
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
@@ -41,20 +40,15 @@ public class StaxStreamingService extends ServiceImp {
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
-    XMLEventReader reader = null;
-    XMLEventWriter writer = null;
     try (InputStream in = new BufferedInputStream(msg.getInputStream());
-        OutputStream out = new BufferedOutputStream(msg.getOutputStream())) {
-      reader = inputBuilder().build().createXMLEventReader(in);
-      writer = outputBuilder().build().createXMLEventWriter(out);
-      writer.add(reader);
+        OutputStream out = new BufferedOutputStream(msg.getOutputStream());
+        EventWrapper wrapper =
+            new EventWrapper(inputBuilder().build().createXMLEventReader(in),
+                outputBuilder().build().createXMLEventWriter(out))) {
+      wrapper.writer.add(wrapper.reader);
     }
     catch (Exception e) {
       throw ExceptionHelper.wrapServiceException(e);
-    }
-    finally {
-      closeQuietly(reader);
-      closeQuietly(writer);
     }
   }
 
@@ -102,5 +96,23 @@ public class StaxStreamingService extends ServiceImp {
   
   private XmlOutputFactoryBuilder outputBuilder() {
     return getOutputBuilder() != null ? getOutputBuilder() : defaultOutputBuilder;
+  }
+
+  private static class EventWrapper implements Closeable {
+
+    private XMLEventReader reader;
+    private XMLEventWriter writer;
+
+    private EventWrapper(XMLEventReader r, XMLEventWriter w) {
+      this.reader = r;
+      this.writer = w;
+    }
+
+    @Override
+    public void close() throws IOException {
+      closeQuietly(reader);
+      closeQuietly(writer);
+    }
+
   }
 }
