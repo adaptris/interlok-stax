@@ -44,14 +44,14 @@ public class TransformPluginServiceTest extends ServiceCase {
     StaxTransformPlugin onEntry = new StaxTransformPlugin()
         .withInputCondition(
             new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/json"))
-        .withInputFactory(new DummyJsonStreamingInputFactory())
-        .withOutputFactory(new DefaultWriterFactory());
+        .withInputBuilder(new DummyJsonStreamingInputFactory())
+        .withOutputBuilder(new DefaultWriterFactory());
     StaxTransformPlugin onExit = new StaxTransformPlugin()
         .withInputCondition(new MatchCondition().withWhen("%message{Accept}").withMatches("application/json"))
         .withPostTransform(
             new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/json")))
-        .withInputFactory(new DefaultInputFactory())
-        .withOutputFactory(new DummyJsonStreamingOutput());
+        .withInputBuilder(new DefaultInputFactory())
+        .withOutputBuilder(new DummyJsonStreamingOutput());
 
     XmlTransformService transform = new XmlTransformService();
     transform.setUrl("http://localhost:8080/path/to/transform.xsl");
@@ -145,14 +145,14 @@ public class TransformPluginServiceTest extends ServiceCase {
         .withInputCondition(new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/xml"))
         .withPostTransform(
             new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/xml")))
-        .withInputFactory(new DefaultInputFactory())
-        .withOutputFactory(new SaxonStreamWriterFactory());
+        .withInputBuilder(new DefaultInputFactory())
+        .withOutputBuilder(new SaxonStreamWriterFactory());
     StaxTransformPlugin onExit = new StaxTransformPlugin()
         .withInputCondition(new MatchCondition().withWhen("%message{Accept}").withMatches("application/xml"))
         .withPostTransform(
             new AddMetadata().withMetadata(new MetadataElement("Content-Type", "text/xml")))
-        .withInputFactory(new DefaultInputFactory())
-        .withOutputFactory(new SaxonStreamWriterFactory());
+        .withInputBuilder(new DefaultInputFactory())
+        .withOutputBuilder(new SaxonStreamWriterFactory());
 
     ServiceListWithPlugin list =
         new ServiceListWithPlugin().withOnEntry(onEntry).withOnExit(onExit);

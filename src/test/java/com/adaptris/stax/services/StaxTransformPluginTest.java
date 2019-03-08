@@ -81,8 +81,8 @@ public class StaxTransformPluginTest {
             new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/xml"))
         .withPostTransform(
             new AddMetadata().withMetadata(new MetadataElement("Content-Type", "text/xml")))
-        .withInputFactory(new DefaultInputFactory())
-        .withOutputFactory(new SaxonStreamWriterFactory());
+        .withInputBuilder(new DefaultInputFactory())
+        .withOutputBuilder(new SaxonStreamWriterFactory());
     return plugin;
   }
 }

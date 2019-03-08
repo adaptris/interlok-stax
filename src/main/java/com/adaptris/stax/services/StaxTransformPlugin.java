@@ -45,7 +45,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @ComponentProfile(summary = "transform-plugin implementation for TransformPluginServiceList",
     since = "3.8.4")
 @DisplayOrder(
-    order = {"inputCondition", "inputFactoryBuilder", "outputFactoryBuilder", "postTransform"})
+    order = {"inputCondition", "inputBuilder", "outputBuilder", "postTransform"})
 public class StaxTransformPlugin implements Plugin {
 
   private static InputCondition NEVER_MATCH = (m) -> {
@@ -57,9 +57,9 @@ public class StaxTransformPlugin implements Plugin {
   };
 
   @NotNull
-  private XmlInputFactoryBuilder inputFactoryBuilder;
+  private XmlInputFactoryBuilder inputBuilder;
   @NotNull
-  private XmlOutputFactoryBuilder outputFactoryBuilder;
+  private XmlOutputFactoryBuilder outputBuilder;
 
   @InputFieldDefault(value = "never fires")
   private InputCondition inputCondition;
@@ -72,8 +72,8 @@ public class StaxTransformPlugin implements Plugin {
   @Override
   public void init() throws CoreException {
     try {
-      Args.notNull(getInputFactoryBuilder(), "inputFactory");
-      Args.notNull(getOutputFactoryBuilder(), "outputFactory");
+      Args.notNull(getInputBuilder(), "inputFactory");
+      Args.notNull(getOutputBuilder(), "outputFactory");
       LifecycleHelper.init(getInputCondition());
       LifecycleHelper.init(getPostTransform());
     } catch (Exception e) {
@@ -107,8 +107,8 @@ public class StaxTransformPlugin implements Plugin {
       try (InputStream in = new BufferedInputStream(msg.getInputStream());
           OutputStream out = new BufferedOutputStream(msg.getOutputStream());
           CloseableStaxWrapper wrapper =
-              new CloseableStaxWrapper(getInputFactoryBuilder().build().createXMLEventReader(in),
-                  getOutputFactoryBuilder().build().createXMLEventWriter(out))) {
+              new CloseableStaxWrapper(getInputBuilder().build().createXMLEventReader(in),
+                  getOutputBuilder().build().createXMLEventWriter(out))) {
         wrapper.writer().add(wrapper.reader());
         output.applyChanges(msg);
       } catch (Exception e) {
@@ -118,8 +118,8 @@ public class StaxTransformPlugin implements Plugin {
     return msg;
   }
 
-  public XmlInputFactoryBuilder getInputFactoryBuilder() {
-    return inputFactoryBuilder;
+  public XmlInputFactoryBuilder getInputBuilder() {
+    return inputBuilder;
   }
 
   /**
@@ -127,17 +127,17 @@ public class StaxTransformPlugin implements Plugin {
    * 
    * @param fac the input factory.
    */
-  public void setInputFactoryBuilder(XmlInputFactoryBuilder fac) {
-    this.inputFactoryBuilder = Args.notNull(fac, "inputFactory");
+  public void setInputBuilder(XmlInputFactoryBuilder fac) {
+    this.inputBuilder = Args.notNull(fac, "inputFactory");
   }
 
-  public StaxTransformPlugin withInputFactory(XmlInputFactoryBuilder f) {
-    setInputFactoryBuilder(f);
+  public StaxTransformPlugin withInputBuilder(XmlInputFactoryBuilder f) {
+    setInputBuilder(f);
     return this;
   }
 
-  public XmlOutputFactoryBuilder getOutputFactoryBuilder() {
-    return outputFactoryBuilder;
+  public XmlOutputFactoryBuilder getOutputBuilder() {
+    return outputBuilder;
   }
 
   /**
@@ -145,12 +145,12 @@ public class StaxTransformPlugin implements Plugin {
    * 
    * @param fac the output factory.
    */
-  public void setOutputFactoryBuilder(XmlOutputFactoryBuilder fac) {
-    this.outputFactoryBuilder = Args.notNull(fac, "outputFactory");
+  public void setOutputBuilder(XmlOutputFactoryBuilder fac) {
+    this.outputBuilder = Args.notNull(fac, "outputFactory");
   }
 
-  public StaxTransformPlugin withOutputFactory(XmlOutputFactoryBuilder f) {
-    setOutputFactoryBuilder(f);
+  public StaxTransformPlugin withOutputBuilder(XmlOutputFactoryBuilder f) {
+    setOutputBuilder(f);
     return this;
   }
 
