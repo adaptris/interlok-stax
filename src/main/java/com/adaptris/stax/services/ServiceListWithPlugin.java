@@ -44,8 +44,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * otherwise it is a no-op operation.
  * </p>
  * <p>
- * Note that this behaviour is achievable in a number of ways with Interlok itself already; this is
- * simply a convenience.
+ * Note that this behaviour is achievable in a number of ways with Interlok itself already, most easily with 
+ * the {@code interlok-config-conditional} package; this is simply a convenience. There will also be 
+ * situations where streaming from JSON to XML won't work, such as when the incoming message is a JSON 
+ * array (you may need to have additional post configuration) or when the XML has attributes.
  * </p>
  * 
  * @config stax-plugin-service-list
