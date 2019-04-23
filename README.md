@@ -1,4 +1,6 @@
-# interlok-stax [![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags) [![Build Status](https://travis-ci.org/adaptris/interlok-stax.svg?branch=develop)](https://travis-ci.org/adaptris/interlok-stax) [![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
+# interlok-stax
+[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags) [![Build Status](https://travis-ci.org/adaptris/interlok-stax.svg?branch=develop)](https://travis-ci.org/adaptris/interlok-stax) [![CircleCI](https://circleci.com/gh/adaptris/interlok-stax/tree/develop.svg?style=svg)](https://circleci.com/gh/adaptris/interlok-stax/tree/develop) [![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
+
 The suggested name was `animated-dollop`
 
 # Provides XML support via STaX
