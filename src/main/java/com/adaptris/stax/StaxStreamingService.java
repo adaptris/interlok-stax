@@ -1,16 +1,11 @@
 package com.adaptris.stax;
 
-import static com.adaptris.stax.StaxUtils.closeQuietly;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-
 import com.adaptris.annotation.ComponentProfile;
+import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.ServiceException;
@@ -31,6 +26,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  */
 @XStreamAlias("stax-streaming-service")
 @ComponentProfile(summary = "Use STaX to stream from one format to another", tag = "service,stax,transform,xml,json", since="3.8.3")
+@DisplayOrder(order = {"inputBuilder", "outputBuilder"})
 public class StaxStreamingService extends ServiceImp {
 
   private static XmlInputFactoryBuilder defaultInputBuilder = new DefaultInputFactory();
@@ -41,20 +37,15 @@ public class StaxStreamingService extends ServiceImp {
 
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
-    XMLEventReader reader = null;
-    XMLEventWriter writer = null;
     try (InputStream in = new BufferedInputStream(msg.getInputStream());
-        OutputStream out = new BufferedOutputStream(msg.getOutputStream())) {
-      reader = inputBuilder().build().createXMLEventReader(in);
-      writer = outputBuilder().build().createXMLEventWriter(out);
-      writer.add(reader);
+        OutputStream out = new BufferedOutputStream(msg.getOutputStream());
+        CloseableStaxWrapper wrapper =
+            new CloseableStaxWrapper(inputBuilder().build().createXMLEventReader(in),
+                outputBuilder().build().createXMLEventWriter(out))) {
+      wrapper.writer().add(wrapper.reader());
     }
     catch (Exception e) {
       throw ExceptionHelper.wrapServiceException(e);
-    }
-    finally {
-      closeQuietly(reader);
-      closeQuietly(writer);
     }
   }
 
@@ -103,4 +94,5 @@ public class StaxStreamingService extends ServiceImp {
   private XmlOutputFactoryBuilder outputBuilder() {
     return getOutputBuilder() != null ? getOutputBuilder() : defaultOutputBuilder;
   }
+
 }
