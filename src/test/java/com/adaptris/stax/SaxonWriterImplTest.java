@@ -23,16 +23,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
-import java.util.Arrays;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.adaptris.util.KeyValuePair;
-import com.adaptris.util.KeyValuePairSet;
-import net.sf.saxon.lib.SaxonOutputKeys;
 
 public class SaxonWriterImplTest {
 
@@ -53,15 +47,6 @@ public class SaxonWriterImplTest {
       impl.createXMLStreamWriter(new StreamResult(new ByteArrayOutputStream()));
       fail();
     } catch (UnsupportedOperationException expected) {
-
-    }
-    try {
-      impl = new SaxonWriterImpl(
-          new KeyValuePairSet(Arrays.asList(new KeyValuePair(SaxonOutputKeys.USE_CHARACTER_MAPS, "yes"),
-              new KeyValuePair(OutputKeys.METHOD, "xml"))));
-      impl.createXMLStreamWriter(new ByteArrayOutputStream(), "UTF-8");
-      fail();
-    } catch (XMLStreamException expected) {
 
     }
   }
