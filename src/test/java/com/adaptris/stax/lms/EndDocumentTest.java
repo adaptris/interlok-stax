@@ -15,9 +15,11 @@
 */
 
 package com.adaptris.stax.lms;
-
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
 import com.adaptris.core.ServiceCase;
@@ -27,11 +29,12 @@ import com.adaptris.core.util.LifecycleHelper;
 
 public class EndDocumentTest extends ServiceCase {
 
-  public EndDocumentTest(String name) {
-    super(name);
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
-
-
+  @Test
   public void testService_NotFileBacked() throws Exception {
     StaxEndDocument service = LifecycleHelper.initAndStart(new StaxEndDocument());
     try {
@@ -49,6 +52,7 @@ public class EndDocumentTest extends ServiceCase {
     LifecycleHelper.stopAndClose(service);
   }
 
+  @Test
   public void testService_NoObject() throws Exception {
     StaxEndDocument service = LifecycleHelper.initAndStart(new StaxEndDocument());
     try {
@@ -63,6 +67,7 @@ public class EndDocumentTest extends ServiceCase {
     }
   }
 
+  @Test
   public void testService() throws Exception {
     StaxStartDocument starter = LifecycleHelper.initAndStart(new StaxStartDocument());
     StaxEndDocument service = LifecycleHelper.initAndStart(new StaxEndDocument());

@@ -17,11 +17,11 @@
 package com.adaptris.stax.lms;
 
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.File;
-
+import org.junit.Test;
 import org.w3c.dom.Document;
-
 import com.adaptris.core.Adapter;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
@@ -40,10 +40,12 @@ import com.adaptris.util.text.xml.XPath;
 
 public class WriteElementTest extends ServiceCase {
 
-  public WriteElementTest(String name) {
-    super(name);
-  }
 
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
+  @Test
   public void testService_NoObject() throws Exception {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());
     try {
@@ -58,6 +60,7 @@ public class WriteElementTest extends ServiceCase {
     }
   }
 
+  @Test
   public void testService() throws Exception {
     StaxStartDocument starter = LifecycleHelper.initAndStart(new StaxStartDocument("my"));
     StaxEndDocument finish = LifecycleHelper.initAndStart(new StaxEndDocument());
@@ -82,6 +85,7 @@ public class WriteElementTest extends ServiceCase {
     }
   }
 
+  @Test
   public void testService_BrokenInput() throws Exception {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());
     try {

@@ -1,7 +1,7 @@
 package com.adaptris.stax.lms;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.ServiceCase;
@@ -11,6 +11,10 @@ import com.adaptris.core.ServiceCase;
  */
 public class StaxGetRootElementServiceTest extends ServiceCase {
 
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
   @Test
   public void testDoService() throws Exception {
     StaxGetRootElementService service = new StaxGetRootElementService();

@@ -1,5 +1,8 @@
 package com.adaptris.stax;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
@@ -17,12 +20,17 @@ public class StaxStreamingServiceTest extends ServiceCase {
       + "<document><nested>1</nested></document>" + System.lineSeparator() + "<document><nested>2</nested></document>"
       + System.lineSeparator() + "<document><nested>3</nested></document>"
       + System.lineSeparator() + "</envelope>";
-  
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
   @Override
   protected StaxStreamingService retrieveObjectForSampleConfig() {
     return new StaxStreamingService().withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new DefaultWriterFactory());
   }
 
+  @Test
   public void testDefaultDoService() throws Exception{
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     StaxStreamingService service = new StaxStreamingService();
@@ -32,6 +40,7 @@ public class StaxStreamingServiceTest extends ServiceCase {
     assertEquals(3, xpath.selectNodeList(d, "/envelope/document").getLength());
   }
   
+  @Test
   public void testDoService() throws Exception{
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     StaxStreamingService service =
@@ -43,6 +52,7 @@ public class StaxStreamingServiceTest extends ServiceCase {
     assertEquals(3, xpath.selectNodeList(d, "/envelope/document").getLength());
   }
   
+  @Test
   public void testDoService_Exception() throws Exception {
     AdaptrisMessage msg = new DefectiveMessageFactory(WhenToBreak.BOTH).newMessage(XML_MESSAGE);
     StaxStreamingService service = new StaxStreamingService().withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new DefaultWriterFactory());
