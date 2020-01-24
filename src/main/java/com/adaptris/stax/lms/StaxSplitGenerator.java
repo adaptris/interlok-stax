@@ -2,14 +2,12 @@ package com.adaptris.stax.lms;
 
 import java.io.IOException;
 import java.util.Iterator;
-
+import java.util.function.Consumer;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-
 import org.apache.commons.io.IOUtils;
-
 import com.adaptris.core.CoreException;
 import com.adaptris.core.util.CloseableIterable;
 
@@ -109,9 +107,21 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
     return null;
   }
 
+  /**
+   * @deprecated since 3.9.3.1 use {@link #isNotEndElement(XMLEvent, String, Consumer)} instead.
+   */
+  @Deprecated
+  // Can't remove because json-streaming uses it.
   public boolean isNotEndElement(XMLEvent evt, String elementName) throws Exception {
+    return isNotEndElement(evt, elementName, (end) -> {
+    });
+  }
+
+  public boolean isNotEndElement(XMLEvent evt, String elementName, Consumer<XMLEvent> endEventCallback)
+      throws Exception {
     if (evt.getEventType() == XMLEvent.END_ELEMENT) {
       if (((EndElement) evt).getName().getLocalPart().equals(elementName)) {
+        endEventCallback.accept(evt);
         return false;
       }
     }
