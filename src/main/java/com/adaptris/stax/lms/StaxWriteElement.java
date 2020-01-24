@@ -17,11 +17,10 @@
 package com.adaptris.stax.lms;
 
 import java.io.InputStream;
-
 import javax.validation.Valid;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.events.XMLEvent;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.core.AdaptrisMessage;
@@ -67,14 +66,16 @@ public class StaxWriteElement extends StaxXmlOutput {
   @Override
   public void doService(AdaptrisMessage msg) throws ServiceException {
     XMLEventReader reader = null;
+    StaxOutputWrapper wrapper = null;
     try {
-      StaxOutputWrapper wrapper = unwrap(msg);
+      wrapper = unwrap(msg);
+      XMLEventWriter eventWriter = wrapper.acquireEventWriter();
       try (InputStream in = msg.getInputStream()) {
         reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(in);
         while (reader.hasNext()) {
           XMLEvent evt = reader.nextEvent();
           if (emit(evt)) {
-            wrapper.eventWriter().add(evt);
+            eventWriter.add(evt);
           }
         }
       }
@@ -84,6 +85,7 @@ public class StaxWriteElement extends StaxXmlOutput {
     }
     finally {
       StaxUtils.closeQuietly(reader);
+      releaseLock(wrapper);
     }
   }
 
@@ -108,5 +110,12 @@ public class StaxWriteElement extends StaxXmlOutput {
   public StaxWriteElement withInputFactoryBuilder(XmlInputFactoryBuilder b) {
     setInputFactoryBuilder(b);
     return this;
+  }
+
+
+  protected static void releaseLock(StaxOutputWrapper w) {
+    if (w != null) {
+      w.releaseLock();
+    }
   }
 }

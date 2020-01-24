@@ -20,13 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.File;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import com.adaptris.core.stubs.TempFileUtils;
 import com.adaptris.stax.lms.StaxOutputWrapper.StaxConfig;
 
@@ -66,13 +63,13 @@ public class StaxOutputWrapperTest {
     File f = TempFileUtils.createTrackedFile(this);
     StaxOutputWrapper wrapper = new StaxOutputWrapper(f);
     try {
-      wrapper.eventWriter();
+      wrapper.acquireEventWriter();
       fail();
     } catch (IllegalArgumentException expected) {
-
+      wrapper.releaseLock();
     }
-    assertNotNull(wrapper.start().eventWriter());
-    wrapper.close();
+    assertNotNull(wrapper.start().acquireEventWriter());
+    wrapper.releaseLock().close();
   }
 
   @Test

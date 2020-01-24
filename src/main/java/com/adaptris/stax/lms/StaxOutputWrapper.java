@@ -18,7 +18,6 @@ package com.adaptris.stax.lms;
 
 import static com.adaptris.stax.StaxUtils.closeQuietly;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,16 +26,14 @@ import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-
 import com.adaptris.core.util.Args;
+import com.adaptris.util.FifoMutexLock;
 
 final class StaxOutputWrapper implements Closeable {
 
@@ -88,6 +85,8 @@ final class StaxOutputWrapper implements Closeable {
   private XMLEventWriter xmlWriter;
   private XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
+  private transient FifoMutexLock lock = new FifoMutexLock();
+
   protected StaxOutputWrapper(File f) throws Exception {
     this.outputFile = f;
     config = new HashMap<>(DEFAULT_CONFIG);
@@ -113,8 +112,19 @@ final class StaxOutputWrapper implements Closeable {
     return this;
   }
 
-  XMLEventWriter eventWriter() {
+  XMLEventWriter acquireEventWriter() throws InterruptedException {
+    acquireLock();
     return Args.notNull(xmlWriter, "xmlWriter");
+  }
+
+  StaxOutputWrapper releaseLock() {
+    lock.release();
+    return this;
+  }
+
+  StaxOutputWrapper acquireLock() throws InterruptedException {
+    lock.acquire();
+    return this;
   }
 
   File outputFile() {
@@ -131,28 +141,39 @@ final class StaxOutputWrapper implements Closeable {
 
 
   protected StaxOutputWrapper start() throws Exception {
-    this.output = new OutputStreamWriter(new FileOutputStream(outputFile), config.get(StaxConfig.Encoding));
-    this.xmlWriter = XMLOutputFactory.newInstance().createXMLEventWriter(output);
-    xmlWriter.add(eventFactory.createStartDocument(config.get(StaxConfig.Encoding), "1.0"));
-    xmlWriter.add(eventFactory.createStartElement(config.get(StaxConfig.Prefix), config.get(StaxConfig.NamespaceURI),
-        config.get(StaxConfig.RootElement)));
+    acquireLock();
+    try {
+      this.output = new OutputStreamWriter(new FileOutputStream(outputFile), config.get(StaxConfig.Encoding));
+      this.xmlWriter = XMLOutputFactory.newInstance().createXMLEventWriter(output);
+      xmlWriter.add(eventFactory.createStartDocument(config.get(StaxConfig.Encoding), "1.0"));
+      xmlWriter.add(eventFactory.createStartElement(config.get(StaxConfig.Prefix), config.get(StaxConfig.NamespaceURI),
+          config.get(StaxConfig.RootElement)));
+    } finally {
+      releaseLock();
+    }
     return this;
   }
-
 
   protected StaxOutputWrapper finish() throws Exception {
-    xmlWriter.add(eventFactory.createEndElement(config.get(StaxConfig.Prefix), config.get(StaxConfig.NamespaceURI),
-        config.get(StaxConfig.RootElement)));
-    xmlWriter.add(eventFactory.createEndDocument());
+    acquireLock();
+    try {
+      xmlWriter.add(eventFactory.createEndElement(config.get(StaxConfig.Prefix), config.get(StaxConfig.NamespaceURI),
+          config.get(StaxConfig.RootElement)));
+      xmlWriter.add(eventFactory.createEndDocument());
+    } finally {
+      releaseLock();
+    }
     return this;
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public void close() throws IOException {
     closeQuietly(xmlWriter);
     IOUtils.closeQuietly(output);
   }
 
+  @Override
   public String toString() {
     return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("outputFile", outputFile).append("config", config)
         .toString();
