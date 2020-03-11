@@ -13,6 +13,9 @@
  */
 package com.adaptris.stax.services;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
@@ -63,6 +66,10 @@ public class TransformPluginServiceTest extends ServiceCase {
     return list;
   }
 
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
+  }
   @Test
   public void testInit() throws Exception {
     ServiceListWithPlugin service = new ServiceListWithPlugin();

@@ -19,7 +19,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.util.Iterator;
-
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import javax.validation.Valid;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,7 +38,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.DisplayOrder;
 import com.adaptris.annotation.InputFieldDefault;
@@ -59,6 +58,7 @@ import com.adaptris.core.util.ExceptionHelper;
 import com.adaptris.core.util.XmlHelper;
 import com.adaptris.stax.XmlInputFactoryBuilder;
 import com.adaptris.util.KeyValuePairSet;
+import com.adaptris.util.NumberUtils;
 import com.adaptris.util.text.xml.SimpleNamespaceContext;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -89,6 +89,10 @@ public class StaxPathSplitter extends MessageSplitterImp {
   @AdvancedConfig
   @InputFieldDefault(value = "false")
   private Boolean suppressPathNotFound;
+
+  @AdvancedConfig
+  @InputFieldDefault(value = "false")
+  private Boolean preserveWhitespaceContent;
 
   @AdvancedConfig
   private Integer bufferSize;
@@ -155,7 +159,12 @@ public class StaxPathSplitter extends MessageSplitterImp {
   }
 
   protected int bufferSize() {
-    return getBufferSize() != null ? getBufferSize().intValue() : DEFAULT_BUFFER_SIZE;
+    return NumberUtils.toIntDefaultIfNull(getBufferSize(), DEFAULT_BUFFER_SIZE);
+  }
+
+  public StaxPathSplitter withBufferSize(Integer i) {
+    setBufferSize(i);
+    return this;
   }
 
   public String getPath() {
@@ -242,8 +251,35 @@ public class StaxPathSplitter extends MessageSplitterImp {
     this.suppressPathNotFound = suppressPathNotFound;
   }
 
+  public StaxPathSplitter withSuppressPathNotFound(Boolean b) {
+    setSuppressPathNotFound(b);
+    return this;
+  }
+
   private boolean suppressPathNotFound(){
     return BooleanUtils.toBooleanDefaultIfNull(getSuppressPathNotFound(), false);
+  }
+
+  public Boolean getPreserveWhitespaceContent() {
+    return preserveWhitespaceContent;
+  }
+
+  /**
+   * Set this to be to true if you have elements that are just whitespace.
+   * 
+   * @param b true to emit 'solely whitespace' elements.
+   */
+  public void setPreserveWhitespaceContent(Boolean b) {
+    this.preserveWhitespaceContent = b;
+  }
+
+  public StaxPathSplitter withPreserveWhitespaceContent(Boolean b) {
+    setPreserveWhitespaceContent(b);
+    return this;
+  }
+
+  private boolean preserveWhitespaceContent() {
+    return BooleanUtils.toBooleanDefaultIfNull(getPreserveWhitespaceContent(), false);
   }
 
   public XmlInputFactoryBuilder getInputFactoryBuilder() {
@@ -306,7 +342,8 @@ public class StaxPathSplitter extends MessageSplitterImp {
         return null;
       }
       Document document = docBuilder.newDocument();
-      createDocument(event, elementName, document, document);
+      createDocument(event, elementName, document, document, (end) -> {
+      });
       AdaptrisMessage splitMsg = factory.newMessage();
       try (OutputStream out = splitMsg.getOutputStream()) {
         serialize(new DOMSource(document), new StreamResult(out), encoding);
@@ -315,35 +352,53 @@ public class StaxPathSplitter extends MessageSplitterImp {
       return splitMsg;
     }
 
-    private void createDocument(final XMLEvent startEvent, String elementName, Document document, Node parentElement)
+    private void createDocument(final XMLEvent startEvent, String elementName, Document document, Node parentElement,
+        Consumer<XMLEvent> endEventCallback)
         throws Exception {
       Element currentElement = null;
       XMLEvent event = startEvent;
       StringBuilder text = new StringBuilder();
-      while (isNotEndElement(event, elementName) && getConfig().getXmlEventReader().hasNext()) {
+      AtomicBoolean isParent = new AtomicBoolean(false);
+      while (isNotEndElement(event, elementName, endEventCallback) && getConfig().getXmlEventReader().hasNext()) {
         switch (event.getEventType()) {
           case XMLStreamConstants.START_ELEMENT:
-          StartElement se = event.asStartElement();
+            StartElement se = event.asStartElement();
+            // This is a child element of the parent; so once we recurse and finish processing
+            // we mark this element as a parent; which means that CHARACTERS don't get
+            // written.
             if(currentElement != null){
-            createDocument(event, se.getName().getLocalPart(), document, currentElement);
+              createDocument(event, se.getName().getLocalPart(), document, currentElement, (end) -> {
+                isParent.getAndSet(true);
+              });
             } else {
               currentElement = createElement(document, se);
               parentElement.appendChild(currentElement);
             }
             break;
           case XMLStreamConstants.CHARACTERS:
-            if (!event.asCharacters().isWhiteSpace() && currentElement != null) {
-              text.append(event.asCharacters().getData());
-              currentElement.setTextContent(text.toString());
+            if (currentElement != null && !isParent.get()) {
+              if (emitCharacters(event)) {
+                text.append(event.asCharacters().getData());
+                currentElement.setTextContent(text.toString());
+              }
             }
             break;
-          case XMLStreamConstants.END_ELEMENT:
-            text = new StringBuilder();
-            currentElement = null;
-            break;
+          // This is never fired because isNotEndElement consumes the event...
+          // case XMLStreamConstants.END_ELEMENT:
+          // text = new StringBuilder();
+          // currentElement = null;
+          // System.out.println("[END_ELEMENT] current = " + currentElement);
+          // break;
         }
         event = getConfig().getXmlEventReader().nextEvent();
       }
+    }
+    
+    private boolean emitCharacters(XMLEvent event) {
+      if (!event.asCharacters().isWhiteSpace()) {
+        return true;
+      }
+      return preserveWhitespaceContent();
     }
 
     private Element createElement(Document document, StartElement se){

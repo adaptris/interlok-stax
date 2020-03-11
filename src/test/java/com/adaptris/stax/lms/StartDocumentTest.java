@@ -15,9 +15,12 @@
 */
 
 package com.adaptris.stax.lms;
-
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.DefaultMessageFactory;
@@ -28,11 +31,13 @@ import com.adaptris.core.util.LifecycleHelper;
 
 public class StartDocumentTest extends ServiceCase {
 
-  public StartDocumentTest(String name) {
-    super(name);
+
+  @Override
+  public boolean isAnnotatedForJunit4() {
+    return true;
   }
 
-
+  @Test
   public void testSetRootElement() throws Exception {
     StaxStartDocument service = new StaxStartDocument();
     assertNull(service.getRootElement());
@@ -43,6 +48,7 @@ public class StartDocumentTest extends ServiceCase {
         service.rootElement(AdaptrisMessageFactory.getDefaultInstance().newMessage()));
   }
 
+  @Test
   public void testPrefixNamespace() throws Exception {
     StaxStartDocument service = new StaxStartDocument();
     assertNull(service.getPrefix());
@@ -54,6 +60,7 @@ public class StartDocumentTest extends ServiceCase {
   }
 
 
+  @Test
   public void testMessageEncoding() throws Exception {
     StaxStartDocument service = new StaxStartDocument();
     assertNull(service.getOutputMessageEncoding());
@@ -66,6 +73,7 @@ public class StartDocumentTest extends ServiceCase {
     assertEquals("ISO-8859-2", service.evaluateEncoding(msg));
   }
 
+  @Test
   public void testService_NotFileBacked() throws Exception {
     StaxStartDocument service = LifecycleHelper.initAndStart(new StaxStartDocument());
     try {
@@ -83,6 +91,7 @@ public class StartDocumentTest extends ServiceCase {
     LifecycleHelper.stopAndClose(service);
   }
 
+  @Test
   public void testService() throws Exception {
     StaxStartDocument service = LifecycleHelper.initAndStart(new StaxStartDocument());
     try {
