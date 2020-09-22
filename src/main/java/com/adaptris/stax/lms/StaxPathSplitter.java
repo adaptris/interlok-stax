@@ -69,7 +69,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * {@code /path/to/repeating/element} would be fine, but {@code //repeating/element} would not. It works based on
  * {@link XMLEventReader} and navigates based on {@link StartElement} events only.
  * </p>
- * 
+ *
  * @config stax-path-splitter
  */
 @XStreamAlias("stax-path-splitter")
@@ -77,7 +77,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class StaxPathSplitter extends MessageSplitterImp {
   private transient static final int DEFAULT_BUFFER_SIZE = 8192;
   private transient Logger log = LoggerFactory.getLogger(this.getClass());
-  
+
   // Transformer is quite expensive, so re-use a thread-local copy.
   private static ThreadLocal<Transformer> transformer = ThreadLocal.withInitial(() -> {
     return newTransformer();
@@ -129,7 +129,8 @@ public class StaxPathSplitter extends MessageSplitterImp {
       BufferedReader buf = new BufferedReader(msg.getReader(), bufferSize());
       XMLEventReader reader = XmlInputFactoryBuilder.defaultIfNull(getInputFactoryBuilder()).build().createXMLEventReader(buf);
       NamespaceContext nsCtx = SimpleNamespaceContext.create(getNamespaceContext(), msg);
-      DocumentBuilderFactory dbFactory = DocumentBuilderFactoryBuilder.newInstance(getXmlDocumentFactoryConfig(), nsCtx).build();
+      DocumentBuilderFactory dbFactory = DocumentBuilderFactoryBuilder
+          .newInstanceIfNull(getXmlDocumentFactoryConfig(), nsCtx).build();
       return new DocumentStaxSplitGenerator(
           new AdaptrisMessageStaxSplitGeneratorConfig().withOriginalMessage(msg)
               .withDocumentBuilderFactory(dbFactory).withXmlEventReader(reader).withPath(thePath)
@@ -151,11 +152,11 @@ public class StaxPathSplitter extends MessageSplitterImp {
    * This is used when; the default buffer size matches the default buffer size in {@link BufferedReader} and {@link BufferedWriter}
    * , changes to the buffersize will impact performance and memory usage depending on the underlying operating system/disk.
    * </p>
-   * 
+   *
    * @param b the buffer size (default is 8192).
    */
   public void setBufferSize(Integer b) {
-    this.bufferSize = b;
+    bufferSize = b;
   }
 
   protected int bufferSize() {
@@ -178,7 +179,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
    * {@code /path/to/repeating/element} would be fine, but {@code //repeating/element} would not. It works based on
    * {@link XMLEventReader} and navigates based on {@link StartElement} events only.
    * </p>
-   * 
+   *
    * @param path the path.
    */
   public void setPath(String path) {
@@ -201,11 +202,11 @@ public class StaxPathSplitter extends MessageSplitterImp {
    * <p>
    * As a result; the character encoding on the message is always set using {@link AdaptrisMessage#setContentEncoding(String)}.
    * </p>
-   * 
+   *
    * @param enc the character encoding
    */
   public void setEncoding(String enc) {
-    this.encoding = enc;
+    encoding = enc;
   }
 
   public StaxPathSplitter withEncoding(String enc) {
@@ -222,9 +223,9 @@ public class StaxPathSplitter extends MessageSplitterImp {
   }
 
   public void setXmlDocumentFactoryConfig(DocumentBuilderFactoryBuilder xml) {
-    this.xmlDocumentFactoryConfig = xml;
+    xmlDocumentFactoryConfig = xml;
   }
-  
+
   public StaxPathSplitter withXmlDocumentFactoryConfig(DocumentBuilderFactoryBuilder builder) {
     setXmlDocumentFactoryConfig(builder);
     return this;
@@ -266,11 +267,11 @@ public class StaxPathSplitter extends MessageSplitterImp {
 
   /**
    * Set this to be to true if you have elements that are just whitespace.
-   * 
+   *
    * @param b true to emit 'solely whitespace' elements.
    */
   public void setPreserveWhitespaceContent(Boolean b) {
-    this.preserveWhitespaceContent = b;
+    preserveWhitespaceContent = b;
   }
 
   public StaxPathSplitter withPreserveWhitespaceContent(Boolean b) {
@@ -318,7 +319,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
     }
   }
 
-  
+
   private class DocumentStaxSplitGenerator extends StaxSplitGenerator<AdaptrisMessageStaxSplitGeneratorConfig, AdaptrisMessage> {
 
     private transient DocumentBuilder docBuilder;
@@ -332,8 +333,8 @@ public class StaxPathSplitter extends MessageSplitterImp {
     @Override
     public void init(AdaptrisMessageStaxSplitGeneratorConfig cfg) throws ParserConfigurationException {
       docBuilder = cfg.builder.newDocumentBuilder();
-      this.factory = selectFactory(cfg.originalMessage);
-      this.encoding = evaluateEncoding(cfg.originalMessage);
+      factory = selectFactory(cfg.originalMessage);
+      encoding = evaluateEncoding(cfg.originalMessage);
     }
 
     @Override
@@ -393,7 +394,7 @@ public class StaxPathSplitter extends MessageSplitterImp {
         event = getConfig().getXmlEventReader().nextEvent();
       }
     }
-    
+
     private boolean emitCharacters(XMLEvent event) {
       if (!event.asCharacters().isWhiteSpace()) {
         return true;
@@ -410,8 +411,8 @@ public class StaxPathSplitter extends MessageSplitterImp {
       }
       return element;
     }
-    
-    
+
+
     private void serialize(DOMSource doc, StreamResult result, String encoding)
         throws TransformerFactoryConfigurationError, TransformerException {
       Transformer serializer = transformer.get();
