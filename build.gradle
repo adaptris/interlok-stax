@@ -218,6 +218,8 @@ publishing {
         properties.appendNode("target", "3.6.6+")
         properties.appendNode("tags", "stax,xml")
         properties.appendNode("license", "false")
+        properties.appendNode("repository", "https://github.com/adaptris/interlok-stax")
+        properties.appendNode("readme", "https://github.com/adaptris/interlok-stax/raw/develop/README.md")
       }
     }
   }
