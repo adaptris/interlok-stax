@@ -1,5 +1,5 @@
 # interlok-stax
-[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags) [![Build Status](https://travis-ci.org/adaptris/interlok-stax.svg?branch=develop)](https://travis-ci.org/adaptris/interlok-stax) [![CircleCI](https://circleci.com/gh/adaptris/interlok-stax/tree/develop.svg?style=svg)](https://circleci.com/gh/adaptris/interlok-stax/tree/develop) [![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
+[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags) [![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
 
 The suggested name was `animated-dollop`
 
@@ -8,12 +8,12 @@ The suggested name was `animated-dollop`
 Might provide better performance characteristics when working with large XML files where you don't need full XPath support via xpath-message-splitter.
 
 * stax-path-splitter -> splits an XML file using STaX events based on a configured path.
-* stax-xml-start-document / stax-xml-write-element / stax-xml-end-document -> allows you to build up a document using STaX events in an iterative manner. 
+* stax-xml-start-document / stax-xml-write-element / stax-xml-end-document -> allows you to build up a document using STaX events in an iterative manner.
 * com.adaptris.stax.* -> Used to write documents in a streaming fashion where required (e.g. CSV).
 
 # Example Use Case
 
-Pretty contrived, but you should get the idea. If you had a huge XML document that you wanted to split and map into a slightly different format (the mapping presumably doesn't need the whole XML in order to succeed) then you could : 
+Pretty contrived, but you should get the idea. If you had a huge XML document that you wanted to split and map into a slightly different format (the mapping presumably doesn't need the whole XML in order to succeed) then you could :
 
 ```
  <stax-xml-start-document/>
@@ -48,7 +48,7 @@ If you had a huge CSV file that needed to be converted into XML, you could do th
    </splitter>
    <service class="service-list">
      <services>
-       <simple-csv-to-xml-transform> 
+       <simple-csv-to-xml-transform>
          <unique-record-names>false</unique-record-names>
          <element-names-from-first-record>true</element-names-from-first-record>
        </simple-csv-to-xml-transform>
@@ -58,5 +58,3 @@ If you had a huge CSV file that needed to be converted into XML, you could do th
  </advanced-message-splitter-service>
  <stax-xml-end-document/>
 ```
-
-
