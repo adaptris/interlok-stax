@@ -2,13 +2,10 @@ package com.adaptris.stax.lms;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.XMLEvent;
-
-import org.hibernate.validator.constraints.NotBlank;
-
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.annotation.AffectsMetadata;
 import com.adaptris.annotation.ComponentProfile;
@@ -97,7 +94,7 @@ public class StaxGetRootElementService extends ServiceImp {
    * @param b the buffer size (default is 8192).
    */
   public void setBufferSize(Integer b) {
-    this.bufferSize = b;
+    bufferSize = b;
   }
 
   protected int bufferSize() {

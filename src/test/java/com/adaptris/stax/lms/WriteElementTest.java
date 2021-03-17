@@ -26,7 +26,6 @@ import com.adaptris.core.Adapter;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
 import com.adaptris.core.HeartbeatEvent;
-import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.XStreamMarshaller;
 import com.adaptris.core.event.StandardAdapterStartUpEvent;
@@ -36,15 +35,11 @@ import com.adaptris.core.stubs.DefectiveMessageFactory.WhenToBreak;
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.core.util.XmlHelper;
+import com.adaptris.interlok.junit.scaffolding.services.ExampleServiceCase;
 import com.adaptris.util.text.xml.XPath;
 
-public class WriteElementTest extends ServiceCase {
+public class WriteElementTest extends ExampleServiceCase {
 
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
   @Test
   public void testService_NoObject() throws Exception {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());

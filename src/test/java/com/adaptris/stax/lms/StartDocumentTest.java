@@ -24,18 +24,12 @@ import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.DefaultMessageFactory;
-import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.junit.scaffolding.services.ExampleServiceCase;
 
-public class StartDocumentTest extends ServiceCase {
-
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
+public class StartDocumentTest extends ExampleServiceCase {
 
   @Test
   public void testSetRootElement() throws Exception {
