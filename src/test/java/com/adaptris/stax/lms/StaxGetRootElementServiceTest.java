@@ -4,17 +4,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
-import com.adaptris.core.ServiceCase;
+import com.adaptris.interlok.junit.scaffolding.services.ExampleServiceCase;
 
 /**
  * @author mwarman
  */
-public class StaxGetRootElementServiceTest extends ServiceCase {
+public class StaxGetRootElementServiceTest extends ExampleServiceCase {
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
   @Test
   public void testDoService() throws Exception {
     StaxGetRootElementService service = new StaxGetRootElementService();

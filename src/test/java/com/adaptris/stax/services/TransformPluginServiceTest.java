@@ -1,11 +1,11 @@
 /*
  * Copyright Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -21,21 +21,21 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.MetadataElement;
-import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.stubs.DefectiveMessageFactory;
 import com.adaptris.core.stubs.DefectiveMessageFactory.WhenToBreak;
-import com.adaptris.core.transform.XmlSchemaValidator;
 import com.adaptris.core.transform.XmlTransformService;
 import com.adaptris.core.transform.XmlValidationService;
+import com.adaptris.core.transform.schema.BasicXmlSchemaValidator;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.junit.scaffolding.services.ExampleServiceCase;
 import com.adaptris.stax.DefaultInputFactory;
 import com.adaptris.stax.DefaultWriterFactory;
 import com.adaptris.stax.DummyJsonStreamingInputFactory;
 import com.adaptris.stax.DummyJsonStreamingOutput;
 import com.adaptris.stax.SaxonStreamWriterFactory;
 
-public class TransformPluginServiceTest extends ServiceCase {
+public class TransformPluginServiceTest extends ExampleServiceCase {
   private static final String XML_MESSAGE = "<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?>"
       + System.lineSeparator() + "<envelope>" + System.lineSeparator()
       + "<document><nested>1</nested></document>" + System.lineSeparator()
@@ -59,17 +59,14 @@ public class TransformPluginServiceTest extends ServiceCase {
     XmlTransformService transform = new XmlTransformService();
     transform.setUrl("http://localhost:8080/path/to/transform.xsl");
     XmlValidationService validator = new XmlValidationService(
-        new XmlSchemaValidator("http://localhost:8080/path/to/schema.xsd"));
+        new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd"));
     ServiceListWithPlugin list = new ServiceListWithPlugin().withOnEntry(onEntry)
         .withOnExit(onExit).withServices(new XmlValidationService(
-            new XmlSchemaValidator("http://localhost:8080/path/to/schema.xsd")), transform);
+            new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd")),
+            transform);
     return list;
   }
 
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
   @Test
   public void testInit() throws Exception {
     ServiceListWithPlugin service = new ServiceListWithPlugin();
@@ -93,7 +90,7 @@ public class TransformPluginServiceTest extends ServiceCase {
   public void testDoService() throws Exception {
     AdaptrisMessage msg = createMessage();
     ServiceListWithPlugin service = new ServiceListWithPlugin();
-    ServiceCase.execute(service, msg);
+    execute(service, msg);
     // This effectively does nothing
     assertEquals("application/xml", msg.getMetadataValue("Content-Type"));
   }
@@ -102,7 +99,7 @@ public class TransformPluginServiceTest extends ServiceCase {
   public void testDoService_WithMatches() throws Exception {
     AdaptrisMessage msg = createMessage();
     ServiceListWithPlugin service = createForTests();
-    ServiceCase.execute(service, msg);
+    execute(service, msg);
     // This should have changed the Content-Type key to text/xml
     assertEquals("text/xml", msg.getMetadataValue("Content-Type"));
   }
@@ -113,7 +110,7 @@ public class TransformPluginServiceTest extends ServiceCase {
     msg.addMetadata(new MetadataElement("Content-Type", "plain/text"));
     msg.addMetadata(new MetadataElement("Accept", "plain/text"));
     ServiceListWithPlugin service = createForTests();
-    ServiceCase.execute(service, msg);
+    execute(service, msg);
     assertEquals("plain/text", msg.getMetadataValue("Content-Type"));
   }
 
@@ -122,7 +119,7 @@ public class TransformPluginServiceTest extends ServiceCase {
     AdaptrisMessage msg = createMessage();
     msg.clearMetadata();
     ServiceListWithPlugin service = createForTests();
-    ServiceCase.execute(service, msg);
+    execute(service, msg);
     assertNull(msg.getMetadataValue("Content-Type"));
   }
 

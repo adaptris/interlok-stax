@@ -1,12 +1,12 @@
 /*
  * Copyright Adaptris Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,9 +29,9 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.MetadataElement;
-import com.adaptris.core.util.CloseableIterable;
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.XmlHelper;
+import com.adaptris.interlok.util.CloseableIterable;
 import com.adaptris.util.text.xml.XPath;
 
 public class StaxSplitterTest {
@@ -42,17 +42,17 @@ public class StaxSplitterTest {
       + System.lineSeparator() + "<document><nested>3</nested></document>"
       + System.lineSeparator() + "</envelope>";
 
-  private static final String XML_WITH_WHITESPACE = "<envelope>\n" + 
-      "  <document>\n" + 
+  private static final String XML_WITH_WHITESPACE = "<envelope>\n" +
+      "  <document>\n" +
       "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" +
-      "    <Zip> </Zip>\n" + 
-      "  </document>\n" + 
-      "  <document>\n" + 
-      "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" + 
-      "    <Zip> </Zip>\n" + 
-      "  </document>\n" + 
+      "    <Zip> </Zip>\n" +
+      "  </document>\n" +
+      "  <document>\n" +
+      "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" +
+      "    <Zip> </Zip>\n" +
+      "  </document>\n" +
       "</envelope>";
-  
+
   @Test
   public void testSplit() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document").withInputFactoryBuilder(null);
@@ -116,7 +116,7 @@ public class StaxSplitterTest {
   @Test
   public void testEncoding() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document").withEncoding("ISO-8859-1");
-    assertEquals("ISO-8859-1", splitter.getEncoding());    
+    assertEquals("ISO-8859-1", splitter.getEncoding());
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE, "UTF-8");
     assertEquals("ISO-8859-1", splitter.evaluateEncoding(msg));
     splitter.setEncoding(null);
@@ -150,7 +150,7 @@ public class StaxSplitterTest {
       i.next();
     }
     // This should throw an IllegalState
-    Iterator<AdaptrisMessage> i =  iterable.iterator();  
+    Iterator<AdaptrisMessage> i =  iterable.iterator();
   }
 
 

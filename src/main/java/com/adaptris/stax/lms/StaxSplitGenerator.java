@@ -8,8 +8,9 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import org.apache.commons.io.IOUtils;
+import com.adaptris.annotation.Removal;
 import com.adaptris.core.CoreException;
-import com.adaptris.core.util.CloseableIterable;
+import com.adaptris.interlok.util.CloseableIterable;
 
 public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> implements CloseableIterable<T>, Iterator<T> {
 
@@ -111,6 +112,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
    * @deprecated since 3.9.3.1 use {@link #isNotEndElement(XMLEvent, String, Consumer)} instead.
    */
   @Deprecated
+  @Removal(version = "5.0.0")
   // Can't remove because json-streaming uses it.
   public boolean isNotEndElement(XMLEvent evt, String elementName) throws Exception {
     return isNotEndElement(evt, elementName, (end) -> {

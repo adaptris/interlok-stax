@@ -22,18 +22,13 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
-import com.adaptris.core.ServiceCase;
 import com.adaptris.core.ServiceException;
 import com.adaptris.core.lms.FileBackedMessageFactory;
 import com.adaptris.core.util.LifecycleHelper;
+import com.adaptris.interlok.junit.scaffolding.services.ExampleServiceCase;
 
-public class EndDocumentTest extends ServiceCase {
+public class EndDocumentTest extends ExampleServiceCase {
 
-
-  @Override
-  public boolean isAnnotatedForJunit4() {
-    return true;
-  }
   @Test
   public void testService_NotFileBacked() throws Exception {
     StaxEndDocument service = LifecycleHelper.initAndStart(new StaxEndDocument());
