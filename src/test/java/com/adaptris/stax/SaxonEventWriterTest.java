@@ -20,8 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
@@ -147,7 +147,7 @@ public class SaxonEventWriterTest {
     }
     Mockito.verify(mocker, Mockito.atLeast(1)).setDefaultNamespace(anyString());
     Mockito.verify(mocker, Mockito.atLeast(1)).getNamespaceContext();
-    Mockito.verify(mocker, Mockito.atLeast(1)).setNamespaceContext(anyObject());
+    Mockito.verify(mocker, Mockito.atLeast(1)).setNamespaceContext(any());
     Mockito.verify(mocker, Mockito.atLeast(1)).close();
   }
 
