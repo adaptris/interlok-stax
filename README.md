@@ -1,5 +1,12 @@
 # interlok-stax
-[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags) [![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
+
+[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/tags)
+[![license](https://img.shields.io/github/license/adaptris/interlok-stax.svg)](https://github.com/adaptris/interlok-stax/blob/develop/LICENSE)
+[![Actions Status](https://github.com/adaptris/interlok-stax/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/adaptris/interlok-stax/actions)
+[![codecov](https://codecov.io/gh/adaptris/interlok-stax/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-stax)
+[![CodeQL](https://github.com/adaptris/interlok-stax/workflows/CodeQL/badge.svg)](https://github.com/adaptris/interlok-stax/security/code-scanning)
+[![Known Vulnerabilities](https://snyk.io/test/github/adaptris/interlok-stax/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/adaptris/interlok-stax?targetFile=build.gradle)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/adaptris/interlok-stax)](https://github.com/adaptris/interlok-stax/pulls?q=is%3Apr+is%3Aclosed)
 
 The suggested name was `animated-dollop`
 
