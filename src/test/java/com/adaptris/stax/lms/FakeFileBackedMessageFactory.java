@@ -29,4 +29,5 @@ public class FakeFileBackedMessageFactory extends DefaultMessageFactory {
   public AdaptrisMessage newMessage() {
     return new FakeFileBackedMessage(uniqueIdGenerator(), this);
   }
+
 }

@@ -43,7 +43,6 @@ public abstract class StaxUtils {
     }
   }
 
-
   public static void closeQuietly(XMLEventReader r) {
     try {
       if (r != null) {

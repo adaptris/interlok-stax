@@ -16,24 +16,15 @@
 
 package com.adaptris.stax;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.StringWriter;
 
 import javax.xml.stream.XMLStreamWriter;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DefaultWriterFactoryTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testCreate() throws Exception {

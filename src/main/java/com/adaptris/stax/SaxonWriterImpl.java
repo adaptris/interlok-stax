@@ -19,30 +19,32 @@ package com.adaptris.stax;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.adaptris.util.KeyValuePairBag;
 import com.adaptris.util.KeyValuePairSet;
+
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SerializerFactory;
 
 // to avoid possible NoClassDef issues in the event there is no saxon available (but you're just using the default).
 // Of course if you actually configure a SaxonStreamWriterFactory, then there will be a NoClassDef
 class SaxonWriterImpl extends XMLOutputFactory {
-  private transient static InheritableThreadLocal<SerializerFactory> mySerializer = new InheritableThreadLocal<SerializerFactory>() {
+
+  private transient static InheritableThreadLocal<SerializerFactory> mySerializer = new InheritableThreadLocal<>() {
     @Override
     protected SerializerFactory initialValue() {
       return new SerializerFactory(Configuration.newConfiguration());
     }
   };
-  private transient Logger log = LoggerFactory.getLogger(SaxonStreamWriterFactory.class);
 
   private transient KeyValuePairSet outputProperties;
 
@@ -123,4 +125,5 @@ class SaxonWriterImpl extends XMLOutputFactory {
     }
     return new XMLStreamException(e);
   }
+
 }

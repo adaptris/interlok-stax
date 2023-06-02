@@ -16,25 +16,19 @@
 
 package com.adaptris.stax.lms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.File;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.stubs.TempFileUtils;
 import com.adaptris.stax.lms.StaxOutputWrapper.StaxConfig;
 
 public class StaxOutputWrapperTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testDefaults() throws Exception {
@@ -51,11 +45,12 @@ public class StaxOutputWrapperTest {
   @Test
   public void testBuilder() throws Exception {
     File f = TempFileUtils.createTrackedFile(this);
-    StaxOutputWrapper wrapper = new StaxOutputWrapper(f);
-    assertEquals("ISO-8859-1", wrapper.withEncoding("ISO-8859-1").getStaxConfig(StaxConfig.Encoding));
-    assertEquals("hello", wrapper.withRootElement("hello").getStaxConfig(StaxConfig.RootElement));
-    assertEquals("hello", wrapper.withPrefix("hello").getStaxConfig(StaxConfig.Prefix));
-    assertEquals("hello", wrapper.withNamespaceURI("hello").getStaxConfig(StaxConfig.NamespaceURI));
+    try (StaxOutputWrapper wrapper = new StaxOutputWrapper(f)) {
+      assertEquals("ISO-8859-1", wrapper.withEncoding("ISO-8859-1").getStaxConfig(StaxConfig.Encoding));
+      assertEquals("hello", wrapper.withRootElement("hello").getStaxConfig(StaxConfig.RootElement));
+      assertEquals("hello", wrapper.withPrefix("hello").getStaxConfig(StaxConfig.Prefix));
+      assertEquals("hello", wrapper.withNamespaceURI("hello").getStaxConfig(StaxConfig.NamespaceURI));
+    }
   }
 
   @Test
@@ -69,7 +64,8 @@ public class StaxOutputWrapperTest {
       wrapper.releaseLock();
     }
     assertNotNull(wrapper.start().acquireEventWriter());
-    wrapper.releaseLock().close();
+    wrapper.releaseLock();
+    wrapper.close();
   }
 
   @Test

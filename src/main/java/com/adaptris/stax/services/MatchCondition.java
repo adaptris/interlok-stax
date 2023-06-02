@@ -100,7 +100,7 @@ public class MatchCondition implements InputCondition {
   /**
    * Set the regular expression to match {@link #getWhen()} against.
    * 
-   * @param s a string that conforms to {@link java.util.Pattern} syntax.
+   * @param s a string that conforms to {@link java.util.regex.Pattern} syntax.
    */
   public void setMatches(String s) {
     this.matches = s;

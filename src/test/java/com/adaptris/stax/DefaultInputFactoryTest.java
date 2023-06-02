@@ -16,10 +16,13 @@
 
 package com.adaptris.stax;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.InputStream;
 import java.io.Reader;
+
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
@@ -30,19 +33,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.util.KeyValuePair;
 
 public class DefaultInputFactoryTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testBuild() throws Exception {
@@ -57,11 +53,11 @@ public class DefaultInputFactoryTest {
     assertNotNull(factory.build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuild_WithIllegal() throws Exception {
     DefaultInputFactory factory = new DefaultInputFactory()
         .withInputFactoryProperties(new KeyValuePair("this-is-my-property", Boolean.TRUE.toString()));
-    factory.build();
+    assertThrows(IllegalArgumentException.class, () -> factory.build());
   }
 
   @Test
@@ -70,11 +66,9 @@ public class DefaultInputFactoryTest {
     DefaultInputFactory factory = new DefaultInputFactory().withInputFactoryProperties(
         new KeyValuePair("this-is-my-property", Boolean.TRUE.toString()),
         new KeyValuePair(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.TRUE.toString()));
-    XMLInputFactory xmlF = DefaultInputFactory.configure(new DummyXmlInputFactory(),
-        factory.getInputFactoryProperties());
+    XMLInputFactory xmlF = DefaultInputFactory.configure(new DummyXmlInputFactory(), factory.getInputFactoryProperties());
     assertEquals(DummyXmlInputFactory.class, xmlF.getClass());
   }
-
 
   private class DummyXmlInputFactory extends XMLInputFactory {
 
@@ -94,20 +88,17 @@ public class DefaultInputFactoryTest {
     }
 
     @Override
-    public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding)
-        throws XMLStreamException {
+    public XMLStreamReader createXMLStreamReader(InputStream stream, String encoding) throws XMLStreamException {
       return null;
     }
 
     @Override
-    public XMLStreamReader createXMLStreamReader(String systemId, InputStream stream)
-        throws XMLStreamException {
+    public XMLStreamReader createXMLStreamReader(String systemId, InputStream stream) throws XMLStreamException {
       return null;
     }
 
     @Override
-    public XMLStreamReader createXMLStreamReader(String systemId, Reader reader)
-        throws XMLStreamException {
+    public XMLStreamReader createXMLStreamReader(String systemId, Reader reader) throws XMLStreamException {
       return null;
     }
 
@@ -117,8 +108,7 @@ public class DefaultInputFactoryTest {
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(String systemId, Reader reader)
-        throws XMLStreamException {
+    public XMLEventReader createXMLEventReader(String systemId, Reader reader) throws XMLStreamException {
       return null;
     }
 
@@ -138,26 +128,22 @@ public class DefaultInputFactoryTest {
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(InputStream stream, String encoding)
-        throws XMLStreamException {
+    public XMLEventReader createXMLEventReader(InputStream stream, String encoding) throws XMLStreamException {
       return null;
     }
 
     @Override
-    public XMLEventReader createXMLEventReader(String systemId, InputStream stream)
-        throws XMLStreamException {
+    public XMLEventReader createXMLEventReader(String systemId, InputStream stream) throws XMLStreamException {
       return null;
     }
 
     @Override
-    public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter)
-        throws XMLStreamException {
+    public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) throws XMLStreamException {
       return null;
     }
 
     @Override
-    public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter)
-        throws XMLStreamException {
+    public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter) throws XMLStreamException {
       return null;
     }
 
@@ -203,4 +189,5 @@ public class DefaultInputFactoryTest {
     }
 
   }
+
 }

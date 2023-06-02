@@ -15,15 +15,16 @@
 */
 package com.adaptris.stax.lms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
@@ -36,22 +37,14 @@ import com.adaptris.util.text.xml.XPath;
 
 public class StaxSplitterTest {
 
-  private static final String XML_MESSAGE = "<?xml version=\"1.0\" "
-      + "encoding=\"UTF-8\"?>" + System.lineSeparator() + "<envelope>" + System.lineSeparator()
-      + "<document><nested>1</nested></document>" + System.lineSeparator() + "<document><nested>2</nested></document>"
-      + System.lineSeparator() + "<document><nested>3</nested></document>"
+  private static final String XML_MESSAGE = "<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?>" + System.lineSeparator() + "<envelope>"
+      + System.lineSeparator() + "<document><nested>1</nested></document>" + System.lineSeparator()
+      + "<document><nested>2</nested></document>" + System.lineSeparator() + "<document><nested>3</nested></document>"
       + System.lineSeparator() + "</envelope>";
 
-  private static final String XML_WITH_WHITESPACE = "<envelope>\n" +
-      "  <document>\n" +
-      "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" +
-      "    <Zip> </Zip>\n" +
-      "  </document>\n" +
-      "  <document>\n" +
-      "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" +
-      "    <Zip> </Zip>\n" +
-      "  </document>\n" +
-      "</envelope>";
+  private static final String XML_WITH_WHITESPACE = "<envelope>\n" + "  <document>\n" + "    <NotEmpty>Not_Empty_Element</NotEmpty>\n"
+      + "    <Zip> </Zip>\n" + "  </document>\n" + "  <document>\n" + "    <NotEmpty>Not_Empty_Element</NotEmpty>\n" + "    <Zip> </Zip>\n"
+      + "  </document>\n" + "</envelope>";
 
   @Test
   public void testSplit() throws Exception {
@@ -66,11 +59,12 @@ public class StaxSplitterTest {
     }
   }
 
-  @Test(expected = CoreException.class)
+  @Test
   public void testSplit_NotFound() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document/x");
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
-    splitter.splitMessage(msg);
+
+    assertThrows(CoreException.class, () -> splitter.splitMessage(msg));
   }
 
   @Test
@@ -81,19 +75,18 @@ public class StaxSplitterTest {
     assertEquals(0, list.size());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testSplit_Remove() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     try (CloseableIterable<AdaptrisMessage> i = CloseableIterable.ensureCloseable(splitter.splitMessage(msg))) {
-      i.iterator().remove();
-    };
+      assertThrows(UnsupportedOperationException.class, () -> i.iterator().remove());
+    }
   }
 
   @Test
   public void testSplit_NoSlashPrefix() throws Exception {
-    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withXmlDocumentFactoryConfig(null)
-        .withNamespaceContext(null);
+    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withXmlDocumentFactoryConfig(null).withNamespaceContext(null);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(3, list.size());
@@ -129,7 +122,8 @@ public class StaxSplitterTest {
   @Test
   public void testSplitCopyMetadata() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document");
-    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE, Collections.singleton(new MetadataElement("key", "value")));
+    AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE,
+        Collections.singleton(new MetadataElement("key", "value")));
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(3, list.size());
     for (int i = 0; i < list.size(); i++) {
@@ -141,45 +135,44 @@ public class StaxSplitterTest {
     }
   }
 
-  @Test(expected = CoreException.class)
+  @Test
   public void testSplit_DoubleIterator() throws Exception {
     StaxPathSplitter splitter = new StaxPathSplitter("/envelope/document/x");
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
-    Iterable<AdaptrisMessage> iterable = splitter.splitMessage(msg);
-    for (Iterator<AdaptrisMessage> i =  iterable.iterator(); i.hasNext();) {
-      i.next();
-    }
-    // This should throw an IllegalState
-    Iterator<AdaptrisMessage> i =  iterable.iterator();
+    assertThrows(CoreException.class, () -> {
+      Iterable<AdaptrisMessage> iterable = splitter.splitMessage(msg);
+      for (Iterator<AdaptrisMessage> i =  iterable.iterator(); i.hasNext();) {
+        i.next();
+      }
+      // This should throw an IllegalState
+      iterable.iterator();
+    });
   }
-
 
   @Test
   public void testSplit_NoPreserveWhitespace() throws Exception {
-    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withXmlDocumentFactoryConfig(null)
-        .withNamespaceContext(null);
+    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withXmlDocumentFactoryConfig(null).withNamespaceContext(null);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_WITH_WHITESPACE);
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(2, list.size());
-    for (int i = 0; i < list.size(); i++) {
+    for (AdaptrisMessage element : list) {
       XPath xpath = new XPath();
-      Document d = XmlHelper.createDocument(list.get(i), DocumentBuilderFactoryBuilder.newInstance());
+      Document d = XmlHelper.createDocument(element, DocumentBuilderFactoryBuilder.newInstance());
       // the zip element should never be emitted.
       assertEquals("", xpath.selectSingleTextItem(d, "/document/Zip"));
     }
   }
 
-
   @Test
   public void testSplit_PreserveWhitespace() throws Exception {
-    StaxPathSplitter splitter =
-        new StaxPathSplitter("envelope/document").withPreserveWhitespaceContent(true).withXmlDocumentFactoryConfig(null);
+    StaxPathSplitter splitter = new StaxPathSplitter("envelope/document").withPreserveWhitespaceContent(true)
+        .withXmlDocumentFactoryConfig(null);
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_WITH_WHITESPACE);
     List<AdaptrisMessage> list = toList(splitter.splitMessage(msg));
     assertEquals(2, list.size());
-    for (int i = 0; i < list.size(); i++) {
+    for (AdaptrisMessage element : list) {
       XPath xpath = new XPath();
-      Document d = XmlHelper.createDocument(list.get(i), DocumentBuilderFactoryBuilder.newInstance());
+      Document d = XmlHelper.createDocument(element, DocumentBuilderFactoryBuilder.newInstance());
       // the zip element should be a space
       assertEquals(" ", xpath.selectSingleTextItem(d, "/document/Zip"));
     }
@@ -189,7 +182,7 @@ public class StaxSplitterTest {
     if (iter instanceof List) {
       return (List<AdaptrisMessage>) iter;
     }
-    List<AdaptrisMessage> result = new ArrayList<AdaptrisMessage>();
+    List<AdaptrisMessage> result = new ArrayList<>();
     try (CloseableIterable<AdaptrisMessage> messages = CloseableIterable.ensureCloseable(iter)) {
       for (AdaptrisMessage msg : messages) {
         result.add(msg);

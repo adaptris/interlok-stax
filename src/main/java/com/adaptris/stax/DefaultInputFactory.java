@@ -17,9 +17,12 @@ package com.adaptris.stax;
 
 import java.util.Arrays;
 import java.util.List;
+
 import javax.validation.Valid;
 import javax.xml.stream.XMLInputFactory;
+
 import org.apache.commons.lang3.BooleanUtils;
+
 import com.adaptris.annotation.AdvancedConfig;
 import com.adaptris.core.util.Args;
 import com.adaptris.util.KeyValuePair;
@@ -34,26 +37,23 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("stax-default-stream-input")
 public class DefaultInputFactory implements XmlInputFactoryBuilder {
   // Boolean properties as implied by XMLInputFactory
-  private static final List<String> BOOLEAN_PROPERTIES = Arrays.asList(new String[]
-      {
-          XMLInputFactory.IS_NAMESPACE_AWARE, XMLInputFactory.IS_VALIDATING, XMLInputFactory.IS_COALESCING,
-          XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLInputFactory.SUPPORT_DTD
-      });
+  private static final List<String> BOOLEAN_PROPERTIES = Arrays.asList(XMLInputFactory.IS_NAMESPACE_AWARE, XMLInputFactory.IS_VALIDATING,
+      XMLInputFactory.IS_COALESCING, XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES,
+      XMLInputFactory.SUPPORT_DTD);
 
   @AdvancedConfig
   @Valid
   private KeyValuePairSet inputFactoryProperties;
 
   public DefaultInputFactory() {
-
   }
 
   /**
    * Create a XMLInputFactory.
    *
    * <p>
-   * Note that because {@link KeyValuePairSet} only supports string properties, then you probably won't be able to configure things
-   * like {@link XMLInputFactory#REPORTER} using this class.
+   * Note that because {@link KeyValuePairSet} only supports string properties, then you probably won't be able to configure things like
+   * {@link XMLInputFactory#REPORTER} using this class.
    * </p>
    */
   @Override
@@ -81,8 +81,10 @@ public class DefaultInputFactory implements XmlInputFactoryBuilder {
   /**
    * Create an XMLInputFactory instance with the associated properties.
    *
-   * @param factory the {@code XMLInputFactory} that needs configuring
-   * @param properties the properties, if null, a safe default is assumed.
+   * @param factory
+   *          the {@code XMLInputFactory} that needs configuring
+   * @param properties
+   *          the properties, if null, a safe default is assumed.
    * @return a configured XMLInputFactory instance.
    * @see XMLInputFactory#IS_SUPPORTING_EXTERNAL_ENTITIES
    */
@@ -98,4 +100,5 @@ public class DefaultInputFactory implements XmlInputFactoryBuilder {
     }
     return factory;
   }
+
 }

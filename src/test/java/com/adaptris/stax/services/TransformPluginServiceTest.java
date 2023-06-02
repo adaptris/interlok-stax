@@ -13,10 +13,12 @@
  */
 package com.adaptris.stax.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.CoreException;
@@ -36,34 +38,26 @@ import com.adaptris.stax.DummyJsonStreamingOutput;
 import com.adaptris.stax.SaxonStreamWriterFactory;
 
 public class TransformPluginServiceTest extends ExampleServiceCase {
-  private static final String XML_MESSAGE = "<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?>"
-      + System.lineSeparator() + "<envelope>" + System.lineSeparator()
-      + "<document><nested>1</nested></document>" + System.lineSeparator()
-      + "<document><nested>2</nested></document>" + System.lineSeparator()
-      + "<document><nested>3</nested></document>" + System.lineSeparator() + "</envelope>";
+  private static final String XML_MESSAGE = "<?xml version=\"1.0\" " + "encoding=\"UTF-8\"?>" + System.lineSeparator() + "<envelope>"
+      + System.lineSeparator() + "<document><nested>1</nested></document>" + System.lineSeparator()
+      + "<document><nested>2</nested></document>" + System.lineSeparator() + "<document><nested>3</nested></document>"
+      + System.lineSeparator() + "</envelope>";
 
   @Override
   protected ServiceListWithPlugin retrieveObjectForSampleConfig() {
     StaxTransformPlugin onEntry = new StaxTransformPlugin()
-        .withInputCondition(
-            new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/json"))
-        .withInputBuilder(new DummyJsonStreamingInputFactory())
-        .withOutputBuilder(new DefaultWriterFactory());
+        .withInputCondition(new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/json"))
+        .withInputBuilder(new DummyJsonStreamingInputFactory()).withOutputBuilder(new DefaultWriterFactory());
     StaxTransformPlugin onExit = new StaxTransformPlugin()
         .withInputCondition(new MatchCondition().withWhen("%message{Accept}").withMatches("application/json"))
-        .withPostTransform(
-            new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/json")))
-        .withInputBuilder(new DefaultInputFactory())
-        .withOutputBuilder(new DummyJsonStreamingOutput());
+        .withPostTransform(new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/json")))
+        .withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new DummyJsonStreamingOutput());
 
     XmlTransformService transform = new XmlTransformService();
     transform.setUrl("http://localhost:8080/path/to/transform.xsl");
-    XmlValidationService validator = new XmlValidationService(
-        new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd"));
-    ServiceListWithPlugin list = new ServiceListWithPlugin().withOnEntry(onEntry)
-        .withOnExit(onExit).withServices(new XmlValidationService(
-            new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd")),
-            transform);
+    new XmlValidationService(new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd"));
+    ServiceListWithPlugin list = new ServiceListWithPlugin().withOnEntry(onEntry).withOnExit(onExit).withServices(
+        new XmlValidationService(new BasicXmlSchemaValidator().withSchema("http://localhost:8080/path/to/schema.xsd")), transform);
     return list;
   }
 
@@ -136,7 +130,6 @@ public class TransformPluginServiceTest extends ExampleServiceCase {
     }
   }
 
-
   public static AdaptrisMessage createMessage() {
     AdaptrisMessage msg = AdaptrisMessageFactory.getDefaultInstance().newMessage(XML_MESSAGE);
     msg.addMetadata(new MetadataElement("Content-Type", "application/xml"));
@@ -147,19 +140,15 @@ public class TransformPluginServiceTest extends ExampleServiceCase {
   private ServiceListWithPlugin createForTests() {
     StaxTransformPlugin onEntry = new StaxTransformPlugin()
         .withInputCondition(new MatchCondition().withWhen("%message{Content-Type}").withMatches("application/xml"))
-        .withPostTransform(
-            new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/xml")))
-        .withInputBuilder(new DefaultInputFactory())
-        .withOutputBuilder(new SaxonStreamWriterFactory());
+        .withPostTransform(new AddMetadata().withMetadata(new MetadataElement("Content-Type", "application/xml")))
+        .withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new SaxonStreamWriterFactory());
     StaxTransformPlugin onExit = new StaxTransformPlugin()
         .withInputCondition(new MatchCondition().withWhen("%message{Accept}").withMatches("application/xml"))
-        .withPostTransform(
-            new AddMetadata().withMetadata(new MetadataElement("Content-Type", "text/xml")))
-        .withInputBuilder(new DefaultInputFactory())
-        .withOutputBuilder(new SaxonStreamWriterFactory());
+        .withPostTransform(new AddMetadata().withMetadata(new MetadataElement("Content-Type", "text/xml")))
+        .withInputBuilder(new DefaultInputFactory()).withOutputBuilder(new SaxonStreamWriterFactory());
 
-    ServiceListWithPlugin list =
-        new ServiceListWithPlugin().withOnEntry(onEntry).withOnExit(onExit);
+    ServiceListWithPlugin list = new ServiceListWithPlugin().withOnEntry(onEntry).withOnExit(onExit);
     return list;
   }
+
 }

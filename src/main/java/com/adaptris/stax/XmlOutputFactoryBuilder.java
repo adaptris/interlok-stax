@@ -23,24 +23,26 @@ import javax.xml.stream.XMLStreamWriter;
 
 /**
  * Pluggable implementation for building specific {@link XMLOutputFactory} instances.
- * 
+ *
  *
  */
 public interface XmlOutputFactoryBuilder extends StreamWriterFactory {
-  
+
   /**
    * Create an output factory.
-   * 
+   *
    * @return a configured {@link XMLOutputFactory} instance.
    */
   XMLOutputFactory build();
 
   /**
    * Create a {@link XMLStreamWriter} that wraps the specified writer.
-   * 
-   * 
+   *
+   *
    */
+  @Override
   default XMLStreamWriter create(Writer w) throws Exception {
     return build().createXMLStreamWriter(w);
   }
+
 }
