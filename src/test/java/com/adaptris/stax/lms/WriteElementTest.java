@@ -17,11 +17,14 @@
 package com.adaptris.stax.lms;
 
 import static com.adaptris.stax.lms.StaxXmlOutput.XML_OUTPUT_WRITER_KEY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.File;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
+
 import com.adaptris.core.Adapter;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
@@ -47,10 +50,8 @@ public class WriteElementTest extends ExampleServiceCase {
       AdaptrisMessage msg = new DefaultMessageFactory().newMessage();
       service.doService(msg);
       fail();
-    }
-    catch (ServiceException expected) {
-    }
-    finally {
+    } catch (ServiceException expected) {
+    } finally {
       LifecycleHelper.stopAndClose(service);
     }
   }
@@ -69,11 +70,9 @@ public class WriteElementTest extends ExampleServiceCase {
       finish.doService(msg);
       XPath xpath = new XPath();
       Document doc = XmlHelper.createDocument(msg, new DocumentBuilderFactoryBuilder());
-      assertEquals(StandardAdapterStartUpEvent.class.getCanonicalName(),
-          xpath.selectSingleTextItem(doc, "/my/adapter/start-up-event-imp"));
+      assertEquals(StandardAdapterStartUpEvent.class.getCanonicalName(), xpath.selectSingleTextItem(doc, "/my/adapter/start-up-event-imp"));
       assertEquals(HeartbeatEvent.class.getCanonicalName(), xpath.selectSingleTextItem(doc, "/my/adapter/heartbeat-event-imp"));
-    }
-    finally {
+    } finally {
       LifecycleHelper.stopAndClose(starter);
       LifecycleHelper.stopAndClose(finish);
       LifecycleHelper.stopAndClose(service);
@@ -83,18 +82,15 @@ public class WriteElementTest extends ExampleServiceCase {
   @Test
   public void testService_BrokenInput() throws Exception {
     StaxWriteElement service = LifecycleHelper.initAndStart(new StaxWriteElement());
-    try {
-      File tempFile = new FileBackedMessageFactory().createTempFile(this);
-      StaxOutputWrapper wrapper = new StaxOutputWrapper(tempFile).withEncoding("UTF-8").withRootElement("root");
+    File tempFile = new FileBackedMessageFactory().createTempFile(this);
+    try (StaxOutputWrapper wrapper = new StaxOutputWrapper(tempFile).withEncoding("UTF-8").withRootElement("root")) {
       AdaptrisMessage msg = new DefectiveMessageFactory(WhenToBreak.INPUT).newMessage();
       msg.addObjectHeader(XML_OUTPUT_WRITER_KEY, wrapper);
       service.doService(msg);
       fail();
-    }
-    catch (ServiceException expected) {
+    } catch (ServiceException expected) {
 
-    }
-    finally {
+    } finally {
       LifecycleHelper.stopAndClose(service);
     }
   }
@@ -103,4 +99,5 @@ public class WriteElementTest extends ExampleServiceCase {
   protected StaxWriteElement retrieveObjectForSampleConfig() {
     return new StaxWriteElement().withInputFactoryBuilder(null);
   }
+
 }

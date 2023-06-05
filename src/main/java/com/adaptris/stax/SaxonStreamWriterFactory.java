@@ -31,13 +31,14 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * {@link XmlOutputFactoryBuilder} implementation that uses {@code net.sf.saxon.lib.SerializerFactory#getXMLStreamWriter()}.
- * 
- * 
+ *
+ *
  * @config stax-saxon-stream-writer
  */
 @XStreamAlias("stax-saxon-stream-writer")
 public class SaxonStreamWriterFactory implements XmlOutputFactoryBuilder {
-  private transient static InheritableThreadLocal<SaxonWriterImpl> myFactory = new InheritableThreadLocal<SaxonWriterImpl>();;
+
+  private transient static InheritableThreadLocal<SaxonWriterImpl> myFactory = new InheritableThreadLocal<>();
 
   @NotNull
   @AutoPopulated
@@ -63,7 +64,7 @@ public class SaxonStreamWriterFactory implements XmlOutputFactoryBuilder {
   public synchronized XMLOutputFactory build() {
     if (myFactory.get() == null) {
       myFactory.set(new SaxonWriterImpl(getOutputProperties()));
-    }    
+    }
     return myFactory.get();
   }
 
@@ -77,14 +78,15 @@ public class SaxonStreamWriterFactory implements XmlOutputFactoryBuilder {
   /**
    * Set any output properties required.
    * <p>
-   * The keys should match the properties specified by {@code SaxonOutputKeys}; bear in mind no validation is done on the values or
-   * the license required for those features.
+   * The keys should match the properties specified by {@code SaxonOutputKeys}; bear in mind no validation is done on the values or the
+   * license required for those features.
    * </p>
-   * 
-   * @param kvps any output properties to set
+   *
+   * @param kvps
+   *          any output properties to set
    */
   public void setOutputProperties(KeyValuePairSet kvps) {
-    this.outputProperties = Args.notNull(kvps, "outputProperties");
+    outputProperties = Args.notNull(kvps, "outputProperties");
   }
 
 }
