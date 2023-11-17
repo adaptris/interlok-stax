@@ -16,16 +16,14 @@
 
 package com.adaptris.stax;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.StringWriter;
 
 import javax.xml.stream.XMLStreamWriter;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.adaptris.util.KeyValuePair;
 import com.adaptris.util.KeyValuePairSet;
@@ -34,13 +32,6 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.s9api.Serializer;
 
 public class SaxonWriterFactoryTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testCreate() throws Exception {
@@ -73,8 +64,6 @@ public class SaxonWriterFactoryTest {
 
     factory = new SaxonStreamWriterFactory(new KeyValuePair(SaxonOutputKeys.INDENT_SPACES, "2"));
     assertEquals(1, factory.getOutputProperties().size());
-
   }
-
 
 }

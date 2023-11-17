@@ -16,8 +16,8 @@
 
 package com.adaptris.stax.lms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -25,36 +25,26 @@ import java.io.StringReader;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.adaptris.stax.StaxUtils;
 
-@SuppressWarnings("deprecation")
 public class StaxSplitGeneratorConfigTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testMembers() throws Exception {
     MySplitGeneratorConfig cfg = new MySplitGeneratorConfig();
     assertNull(cfg.getPath());
-    assertNull(cfg.getReader());
+    assertNull(cfg.getXmlEventReader());
     assertNull(cfg.getXmlEventReader());
     assertNull(cfg.getInputReader());
   }
 
   @Test
   public void testPath() throws Exception {
-    MySplitGeneratorConfig cfg =new  MySplitGeneratorConfig().withPath("/fred");
+    MySplitGeneratorConfig cfg = new MySplitGeneratorConfig().withPath("/fred");
     assertEquals("/fred", cfg.getPath());
-    assertNull(cfg.getReader());
+    assertNull(cfg.getXmlEventReader());
     assertNull(cfg.getXmlEventReader());
     assertNull(cfg.getInputReader());
   }
@@ -63,14 +53,14 @@ public class StaxSplitGeneratorConfigTest {
   public void testReader() throws Exception {
     try (BufferedReader buf = new BufferedReader(new StringReader("<hello/>"))) {
       XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(buf);
-      MySplitGeneratorConfig cfg = new MySplitGeneratorConfig().withReader(reader);
+      MySplitGeneratorConfig cfg = new MySplitGeneratorConfig().withXmlEventReader(reader);
       assertNull(cfg.getPath());
-      assertEquals(reader, cfg.getReader());
+      assertEquals(reader, cfg.getXmlEventReader());
       assertEquals(reader, cfg.getXmlEventReader());
       assertNull(cfg.getInputReader());
       cfg.withXmlEventReader(reader);
       assertNull(cfg.getPath());
-      assertEquals(reader, cfg.getReader());
+      assertEquals(reader, cfg.getXmlEventReader());
       assertEquals(reader, cfg.getXmlEventReader());
       assertNull(cfg.getInputReader());
       StaxUtils.closeQuietly(reader);
@@ -83,7 +73,7 @@ public class StaxSplitGeneratorConfigTest {
     try (BufferedReader buf = new BufferedReader(new StringReader("<hello/>"))) {
       MySplitGeneratorConfig cfg = new MySplitGeneratorConfig().withInputReader(buf);
       assertNull(cfg.getPath());
-      assertNull(cfg.getReader());
+      assertNull(cfg.getXmlEventReader());
       assertNull(cfg.getXmlEventReader());
       assertEquals(buf, cfg.getInputReader());
     } finally {
@@ -91,6 +81,6 @@ public class StaxSplitGeneratorConfigTest {
   }
 
   private class MySplitGeneratorConfig extends StaxSplitGeneratorConfig {
-
   }
+
 }

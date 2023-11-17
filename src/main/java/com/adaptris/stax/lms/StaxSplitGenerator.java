@@ -112,7 +112,7 @@ public abstract class StaxSplitGenerator<S extends StaxSplitGeneratorConfig,T> i
    * @deprecated since 3.9.3.1 use {@link #isNotEndElement(XMLEvent, String, Consumer)} instead.
    */
   @Deprecated
-  @Removal(version = "5.0.0")
+  @Removal(version = "5.1.0")
   // Can't remove because json-streaming uses it.
   public boolean isNotEndElement(XMLEvent evt, String elementName) throws Exception {
     return isNotEndElement(evt, elementName, (end) -> {

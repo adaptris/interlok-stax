@@ -16,26 +16,20 @@
 
 package com.adaptris.stax;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
+
 import javax.xml.transform.stream.StreamResult;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class SaxonWriterImplTest {
-
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
 
   @Test
   public void testCreateStreamWriter() throws Exception {
@@ -62,11 +56,9 @@ public class SaxonWriterImplTest {
   @Test
   public void testXmlEventWriter() throws Exception {
     SaxonWriterImpl impl = new SaxonWriterImpl(null);
-    assertEquals(SaxonEventWriter.class,
-        impl.createXMLEventWriter(new ByteArrayOutputStream()).getClass());
+    assertEquals(SaxonEventWriter.class, impl.createXMLEventWriter(new ByteArrayOutputStream()).getClass());
     assertEquals(SaxonEventWriter.class, impl.createXMLEventWriter(new StringWriter()).getClass());
-    assertEquals(SaxonEventWriter.class,
-        impl.createXMLEventWriter(new ByteArrayOutputStream(), null).getClass());
+    assertEquals(SaxonEventWriter.class, impl.createXMLEventWriter(new ByteArrayOutputStream(), null).getClass());
     try {
       impl.createXMLEventWriter(new StreamResult(new ByteArrayOutputStream()));
       fail();

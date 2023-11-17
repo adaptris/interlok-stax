@@ -16,18 +16,20 @@
 
 package com.adaptris.stax;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamConstants;
@@ -47,11 +49,11 @@ import javax.xml.stream.events.ProcessingInstruction;
 import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
+
 import com.adaptris.core.util.DocumentBuilderFactoryBuilder;
 import com.adaptris.core.util.XmlHelper;
 import com.adaptris.util.KeyValuePair;
@@ -60,6 +62,7 @@ import com.adaptris.util.text.xml.SimpleNamespaceContext;
 import com.adaptris.util.text.xml.XPath;
 
 public class SaxonEventWriterTest {
+  
   private static final String XML =
       "<root>\n"
           + "<test att='1'>one</test>\n"
@@ -75,20 +78,11 @@ public class SaxonEventWriterTest {
   private final static String XML_NO_ENCODING = "<?xml version=\"1.0\" ?>\n"
       + XML;
 
-  @Before
-  public void setUp() throws Exception {}
-
-  @After
-  public void tearDown() throws Exception {}
-
-
   @Test
   public void testCopyDocument_ViaEvent() throws Exception {
     SaxonWriterImpl impl = new SaxonWriterImpl(null);
     StringReader xmlBuf = new StringReader(XML_WITH_ENCODING);
-    XMLEventReader reader =
-        XmlInputFactoryBuilder.defaultIfNull(new DefaultInputFactory()).build()
-        .createXMLEventReader(xmlBuf);
+    XMLEventReader reader = XmlInputFactoryBuilder.defaultIfNull(new DefaultInputFactory()).build().createXMLEventReader(xmlBuf);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try (SaxonEventWriter write = (SaxonEventWriter) impl.createXMLEventWriter(out);
         AutoCloseable c1 = wrap(reader);
@@ -125,8 +119,8 @@ public class SaxonEventWriterTest {
   @Test
   public void testPrefix() throws Exception {
     XMLStreamWriter mocker = Mockito.mock(XMLStreamWriter.class);
-    Mockito.when(mocker.getPrefix(anyString())).thenReturn("prefix");;
-    Mockito.when(mocker.getNamespaceContext()).thenReturn(null);;
+    Mockito.when(mocker.getPrefix(anyString())).thenReturn("prefix");
+    Mockito.when(mocker.getNamespaceContext()).thenReturn(null);
     try (SaxonEventWriter writer = new SaxonEventWriter(mocker)) {
       writer.setPrefix("prefix", "uri");
       assertEquals("prefix", writer.getPrefix("uri"));
@@ -175,7 +169,6 @@ public class SaxonEventWriterTest {
         assertTrue(expected.getMessage().contains("Cannot write event type: "));
       }
     }
-
   }
 
   @Test
@@ -185,8 +178,7 @@ public class SaxonEventWriterTest {
     try (SaxonEventWriter writer = new SaxonEventWriter(mocker)) {
       writer.add(mockEvent);
     }
-    Mockito.verify(mocker, Mockito.atLeast(1)).writeAttribute(anyString(), anyString(), anyString(),
-        anyString());
+    Mockito.verify(mocker, Mockito.atLeast(1)).writeAttribute(anyString(), anyString(), anyString(), anyString());
   }
 
   @Test
@@ -229,7 +221,6 @@ public class SaxonEventWriterTest {
     Mockito.verify(mocker, Mockito.atLeast(1)).writeComment(anyString());
   }
 
-
   @Test
   public void testWriteDTD() throws Exception {
     XMLStreamWriter mocker = Mockito.mock(XMLStreamWriter.class);
@@ -252,7 +243,6 @@ public class SaxonEventWriterTest {
     }
     Mockito.verify(mocker, Mockito.atLeast(1)).writeEndDocument();
   }
-
 
   @Test
   public void testWriteEndElement() throws Exception {
@@ -289,8 +279,6 @@ public class SaxonEventWriterTest {
     }
     Mockito.verify(mocker, Mockito.atLeast(1)).writeEntityRef(anyString());
   }
-
-
 
   @Test
   public void testWriteNamespace() throws Exception {
@@ -383,13 +371,10 @@ public class SaxonEventWriterTest {
     try (SaxonEventWriter writer = new SaxonEventWriter(mocker)) {
       writer.add(mockEvent);
     }
-    Mockito.verify(mocker, Mockito.atLeast(1)).writeStartElement(anyString(), anyString(),
-        anyString());
+    Mockito.verify(mocker, Mockito.atLeast(1)).writeStartElement(anyString(), anyString(), anyString());
     Mockito.verify(mocker, Mockito.atLeast(1)).writeNamespace(anyString(), anyString());
-    Mockito.verify(mocker, Mockito.atLeast(1)).writeAttribute(anyString(), anyString(),
-        anyString(), anyString());
+    Mockito.verify(mocker, Mockito.atLeast(1)).writeAttribute(anyString(), anyString(), anyString(), anyString());
   }
-
 
   private Namespace createMockNamespace() {
     Namespace mockEvent = Mockito.mock(Namespace.class);
@@ -431,10 +416,11 @@ public class SaxonEventWriterTest {
     result.add(new KeyValuePair("xs", "http://www.w3.org/2001/XMLSchema"));
     return result;
   }
+
   @FunctionalInterface
   protected interface AutoCloseableWrapper extends AutoCloseable {
     @Override
     void close() throws Exception;
-
   }
+
 }

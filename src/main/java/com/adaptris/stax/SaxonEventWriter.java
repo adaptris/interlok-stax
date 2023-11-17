@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -35,6 +36,7 @@ import javax.xml.stream.events.ProcessingInstruction;
 import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+
 import com.adaptris.core.util.Args;
 
 // Pretty stupid event writer that just delegates to the XMLStreamWriter.
@@ -50,8 +52,7 @@ class SaxonEventWriter implements XMLEventWriter, AutoCloseable {
       public void write(XMLEvent event, XMLStreamWriter writer) throws XMLStreamException {
         Attribute attr = (Attribute) event;
         QName qname = attr.getName();
-        writer.writeAttribute(qname.getPrefix(), qname.getNamespaceURI(), qname.getLocalPart(),
-            attr.getValue());
+        writer.writeAttribute(qname.getPrefix(), qname.getNamespaceURI(), qname.getLocalPart(), attr.getValue());
       }
     },
 
@@ -136,8 +137,7 @@ class SaxonEventWriter implements XMLEventWriter, AutoCloseable {
       public void write(XMLEvent event, XMLStreamWriter writer) throws XMLStreamException {
         StartDocument startDocument = (StartDocument) event;
         if (startDocument.encodingSet()) {
-          writer.writeStartDocument(startDocument.getCharacterEncodingScheme(),
-              startDocument.getVersion());
+          writer.writeStartDocument(startDocument.getCharacterEncodingScheme(), startDocument.getVersion());
         } else {
           writer.writeStartDocument(startDocument.getVersion());
         }
@@ -152,17 +152,19 @@ class SaxonEventWriter implements XMLEventWriter, AutoCloseable {
         // element.getNamespaces().forEachRemaining(e-> {
         // Attribute.write((Namespace) e, writer);
         // });
-        Iterator itr = element.getNamespaces();
-        while (itr.hasNext()) {
-          Namespace.write((Namespace) itr.next(), writer);
+        Iterator<Namespace> namespaces = element.getNamespaces();
+        while (namespaces.hasNext()) {
+          Namespace.write(namespaces.next(), writer);
         }
-        itr = element.getAttributes();
-        while (itr.hasNext()) {
-          Attribute.write((Attribute) itr.next(), writer);
+        Iterator<Attribute> attributes = element.getAttributes();
+        while (attributes.hasNext()) {
+          Attribute.write(attributes.next(), writer);
         }
       }
     };
+
     private int eventType;
+
     EventTypeHandler(int i) {
       eventType = i;
     }
@@ -238,4 +240,5 @@ class SaxonEventWriter implements XMLEventWriter, AutoCloseable {
   protected interface EventTypeWriter {
     void write(XMLEvent event, XMLStreamWriter writer) throws XMLStreamException;
   }
+
 }
