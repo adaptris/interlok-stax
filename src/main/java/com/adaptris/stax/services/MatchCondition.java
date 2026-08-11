@@ -16,7 +16,7 @@
 package com.adaptris.stax.services;
 
 import java.util.regex.Pattern;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import com.adaptris.annotation.ComponentProfile;
 import com.adaptris.annotation.DisplayOrder;

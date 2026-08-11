@@ -2,8 +2,8 @@ package com.adaptris.stax.lms;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.XMLEvent;
 import com.adaptris.annotation.AdvancedConfig;

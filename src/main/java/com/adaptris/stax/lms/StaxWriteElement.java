@@ -17,7 +17,7 @@
 package com.adaptris.stax.lms;
 
 import java.io.InputStream;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.events.XMLEvent;
